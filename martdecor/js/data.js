@@ -3,22 +3,22 @@
 var ON = "https://martdecor.online/product/";
 
 var SECTIONS = [
-  { id: "lepnina", name: "Лепной декор", tone: "stone",
+  { id: "lepnina", name: "Лепной декор", tone: "stone", words: "лепнина карниз молдинг",
     fact: "1 151 карниз и 844 молдинга в каталоге",
     src: "martdecor.online, разделы «Карнизы» и «Молдинги»" },
-  { id: "paneli", name: "Стеновые панели", tone: "sage",
+  { id: "paneli", name: "Стеновые панели", tone: "sage", words: "панель 3d бамбук",
     fact: "364 3D-панели и 108 бамбуковых",
     src: "martdecor.online, разделы «3D стеновые покрытия» и «Бамбуковые панели»" },
-  { id: "shpon", name: "Каменный шпон", tone: "ink",
+  { id: "shpon", name: "Каменный шпон", tone: "ink", words: "шпон камень сланец мрамор слюда",
     fact: "111 позиций: сланец, мрамор, слюда",
     src: "martdecor.online, раздел «Каменный шпон»" },
-  { id: "freski", name: "Фрески и панно", tone: "wine",
+  { id: "freski", name: "Фрески и панно", tone: "wine", words: "фреска панно",
     fact: "9 625 фресок и 43 гипсовых панно",
     src: "martdecor.online, разделы «Фрески» и «Панно»" },
-  { id: "kraski", name: "Краски и штукатурки", tone: "sand",
+  { id: "kraski", name: "Краски и штукатурки", tone: "sand", words: "краска штукатурка колеровка",
     fact: "Колеровка прямо в салоне",
     src: "martdecor.online/about-us — «Колеровка красок и декоративных покрытий»" },
-  { id: "oboi", name: "Обои", tone: "sage",
+  { id: "oboi", name: "Обои", tone: "sage", words: "обои",
     fact: "Италия, Франция — в том числе под заказ из Европы",
     src: "карточки Sirpi на martdecor.online, пост о Casamance в Телеграме" }
 ];

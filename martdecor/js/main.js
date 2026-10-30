@@ -218,10 +218,14 @@
       $("#cat-title").textContent = s ? s.name : "Каталог";
       fill($("#cat-sub"), s ? s.fact + ". Здесь — выборка из нескольких позиций, чтобы показать, как будет устроен раздел." :
         "Шесть разделов салона. В прототипе — по 2–3 позиции в каждом, в каталоге салона их 84" + NB + "797.");
-      var q = st.q.trim().toLowerCase();
+      /* ищем по началу каждого слова: «карнизы» найдут «карниз», «лепнина» — раздел «Лепной декор» */
+      var q = st.q.trim().toLowerCase().split(/\s+/).filter(Boolean).map(function (w) { return w.slice(0, 5); });
       var list = ITEMS.filter(function (it) {
         if (st.sec && it.sec !== st.sec) return false;
-        if (q && (it.name + " " + it.brand + " " + it.group).toLowerCase().indexOf(q) < 0) return false;
+        if (q.length) {
+          var is = sec(it.sec), hay = (it.name + " " + it.brand + " " + it.group + " " + (is ? is.name + " " + is.words : "")).toLowerCase();
+          if (q.some(function (w) { return hay.indexOf(w) < 0; })) return false;
+        }
         if (st.paint && !it.paint) return false;
         if (st.ru && !it.ru) return false;
         if (st.price === "lt1000" && !(it.price && it.price < 1000)) return false;
