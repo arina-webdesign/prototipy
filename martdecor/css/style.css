@@ -183,6 +183,10 @@ p { margin: 0; }
 .sec-card p { font-size: 14px; color: var(--muted); line-height: 1.5; }
 .sec-card .from { margin-top: 12px; font-weight: 700; font-size: 15px; color: var(--wine); }
 .sec-card .go { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 14px; font-weight: 600; }
+.also { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 26px; }
+.also b { font-size: 15px; margin-right: 6px; }
+.also span { font-size: 14px; padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink-2); }
+.visit-info .need { margin-top: 4px; }
 
 /* подбор: шаги */
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; counter-reset: s; }
@@ -291,7 +295,7 @@ p { margin: 0; }
 .visit-info h2 { font-size: 40px; }
 .hours { width: 100%; border-collapse: collapse; font-size: 15px; }
 .hours td { padding: 8px 0; border-bottom: 1px solid var(--line); }
-.hours td:last-child { text-align: right; font-weight: 600; }
+.hours td:last-child { text-align: right; font-weight: 600; white-space: nowrap; padding-left: 12px; }
 .hours tr.today td { color: var(--wine); font-weight: 700; }
 .visit-notes { display: grid; gap: 10px; font-size: 15px; color: var(--ink-2); }
 .visit-notes div { display: flex; gap: 10px; }

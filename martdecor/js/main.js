@@ -156,7 +156,7 @@
     var text;
     if (open) text = "Открыто до " + today[1] + ":00";
     else if (h < today[0]) text = "Откроется сегодня в " + today[0] + ":00";
-    else text = "Сейчас закрыто, откроется завтра в " + SALON.hours[(day + 1) % 7][0] + ":00";
+    else text = "Откроется завтра в " + SALON.hours[(day + 1) % 7][0] + ":00";
     $$("[data-open]").forEach(function (el) {
       el.classList.toggle("closed", !open);
       var t = $(".t", el) || el; t.textContent = typo(text);
