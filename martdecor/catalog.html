@@ -1,61 +1,39 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Каталог — МАРТдекор</title>
+<title>Каталог материалов — МАРТдекор, Ростов-на-Дону</title>
+<meta name="description" content="Лепной декор, стеновые панели, каменный шпон, фрески и панно, краски и штукатурки, обои. Подбираем под ваш интерьер, считаем количество и согласуем сроки.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body data-page="catalog">
-<header class="top" id="top"></header>
+<header class="top"></header>
 
 <main class="wrap">
-  <div class="page-head">
-    <div class="crumbs"><a href="index.html">Главная</a> / Каталог</div>
-    <h1 id="cat-title">Каталог</h1>
-    <p class="lead" id="cat-sub"></p>
-    <div class="tabs" id="tabs"></div>
-  </div>
-
-  <div class="cat">
-    <aside class="filters">
-      <div>
-        <h4>Поиск</h4>
-        <label class="search"><i class="ti ti-search"></i><input id="q" type="search" placeholder="Название или бренд" aria-label="Поиск по названию или бренду"></label>
-      </div>
-      <div>
-        <h4>Подобрать под&nbsp;себя</h4>
-        <label class="check"><input type="checkbox" id="f-paint">Можно покрасить в&nbsp;свой цвет</label>
-        <label class="check"><input type="checkbox" id="f-ru">Сделано в&nbsp;России</label>
-      </div>
-      <div>
-        <h4>Цена</h4>
-        <div class="seg">
-          <label class="check"><input type="radio" name="price" value="" checked>Любая</label>
-          <label class="check"><input type="radio" name="price" value="lt1000">До&nbsp;1&nbsp;000&nbsp;₽</label>
-          <label class="check"><input type="radio" name="price" value="lt10000">До&nbsp;10&nbsp;000&nbsp;₽</label>
-          <label class="check"><input type="radio" name="price" value="gt10000">От&nbsp;10&nbsp;000&nbsp;₽</label>
-        </div>
-      </div>
-      <p class="small muted">Наличие показано для&nbsp;примера. Точное&nbsp;— уточнит менеджер.</p>
-    </aside>
-
-    <section>
-      <div class="cat-top"><span id="cat-count"></span><button class="pick-btn" data-drawer><i class="ti ti-bookmark"></i>Подборка <span class="n" data-count>0</span></button></div>
-      <div class="items" id="cat-items"></div>
-      <div class="need" style="margin-top:28px"><i class="ti ti-database"></i><span><b>Нужно от&nbsp;вас:</b> выгрузка каталога с&nbsp;актуальными ценами и&nbsp;остатками&nbsp;— в&nbsp;рабочей версии каталог будет обновляться из&nbsp;неё, а&nbsp;не&nbsp;вручную.</span></div>
-    </section>
-  </div>
+  <section class="panel">
+    <nav class="crumbs" aria-label="Навигация"><a href="index.html">Главная</a><span>Материалы</span></nav>
+    <div class="page-head">
+      <h1 class="h2" style="font-size:clamp(36px,3.6vw,52px)">Каталог материалов</h1>
+      <p>Подбираем материалы под&nbsp;ваш интерьер, считаем количество и&nbsp;согласуем сроки.</p>
+    </div>
+    <div class="tiles tall" id="tiles"></div>
+    <div id="extra"></div>
+    <div class="also" id="also"></div>
+  </section>
 </main>
 
-<footer class="foot" id="foot"></footer>
+<div class="wrap"><footer class="foot"></footer></div>
 
-<script src="js/typo.js"></script>
-<script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="js/typo.js?v=13"></script>
+<script src="js/data.js?v=13"></script>
+<script src="js/products.js?v=13"></script>
+<script src="js/posts.js?v=13"></script>
+<script src="js/main.js?v=13"></script>
 </body>
 </html>

@@ -1,374 +1,443 @@
-/* МАРТдекор — прототип: общие шапка и подвал, карточки, каталог, подборка, калькулятор. */
+/* МАРТдекор — шапка и подвал, блоки страниц, подборка, запись на подбор, просмотр фото. */
 (function () {
+  "use strict";
   var NB = " ";
-  var page = document.body.getAttribute("data-page");
-  var params = new URLSearchParams(location.search);
+  var PAGE = document.body.getAttribute("data-page");
+  var PER = 24;
 
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function tx(s) { return esc(window.typo ? typo(s) : s); }
   function money(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); }
-  function sec(id) { return SECTIONS.filter(function (s) { return s.id === id; })[0]; }
-  function item(id) { return ITEMS.filter(function (i) { return i.id === id; })[0]; }
-
-  // типографика для всего, что вставляет скрипт: проходим по текстовым узлам
-  function typoTree(el) {
-    if (!el || !window.typo) return;
-    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), n, list = [];
-    while ((n = w.nextNode())) list.push(n);
-    list.forEach(function (t) { if (t.nodeValue.trim()) t.nodeValue = typo(t.nodeValue); });
+  function param(k) { return new URLSearchParams(location.search).get(k); }
+  function src(name, small) { return "img/vk/" + (small ? "s/" : "") + name + ".jpg"; }
+  function pic(name, alt, small, eager) {
+    return name ? '<img src="' + src(name, small) + '" alt="' + esc(alt || "") + '"' + (eager ? "" : ' loading="lazy"') + ' decoding="async">' : "";
   }
-  function fill(el, html) { if (!el) return; el.innerHTML = html; typoTree(el); }
-  // последнее короткое слово не остаётся одно в строке: склеиваем его с предыдущим
-  function glueTails(root) {
-    $$("h1, h2, h3, p, li, summary, blockquote, label, .line", root).forEach(function (el) {
-      var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), n, last = null;
-      while ((n = w.nextNode())) if (n.nodeValue.trim()) last = n;
-      if (!last) return;
-      last.nodeValue = last.nodeValue.replace(/ (\S{1,12}\s*)$/, NB + "$1");
+  function fill(sel, html) { var el = typeof sel === "string" ? $(sel) : sel; if (el) el.innerHTML = html; return el; }
+  function byId(list, id) { for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i]; return null; }
+  var PRODS = window.PRODUCTS || [];
+  var POSTS_ = window.POSTS || [];
+  function cat(id) { return byId(CATS.concat(window.EXTRA_CATS || []), id); }
+  function prod(id) { return byId(PRODS, id); }
+  function post(id) { return byId(POSTS_, id); }
+  function date(iso) {
+    var m = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+    var d = iso.split("-"); return +d[2] + NB + m[+d[1] - 1] + " " + d[0];
+  }
+  function wa(text) { return "https://wa.me/" + SALON.wa + "?text=" + encodeURIComponent(text); }
+  function priceHTML(p) {
+    if (!p.price) return '<span class="muted" style="font:500 15px var(--sans)">Цена по запросу</span>';
+    return "от " + money(p.price) + NB + "₽" + (p.unit ? "<small>" + esc(p.unit) + "</small>" : "");
+  }
+  function priceText(p) { return p.price ? "от " + money(p.price) + " ₽" + (p.unit ? " " + p.unit : "") : "цена по запросу"; }
+  var ARROW = '<span class="arrow" aria-hidden="true"></span>';
+
+  /* ——— подборка (вместо корзины): хранится в браузере ——— */
+  var PICK_KEY = "md-pick";
+  function pickGet() { try { return JSON.parse(localStorage.getItem(PICK_KEY)) || []; } catch (e) { return []; } }
+  function pickSet(a) { try { localStorage.setItem(PICK_KEY, JSON.stringify(a)); } catch (e) {} syncPick(); }
+  function pickHas(k) { return pickGet().indexOf(k) >= 0; }
+  function pickToggle(k) {
+    var a = pickGet(), i = a.indexOf(k);
+    if (i >= 0) { a.splice(i, 1); toast("Убрали из подборки"); } else { a.push(k); toast("Добавили в подборку"); }
+    pickSet(a);
+  }
+  function pickItem(k) {
+    var kind = k.slice(0, 1), id = k.slice(2);
+    if (kind === "p") { var p = prod(id); return p && { name: p.name, sub: priceText(p), img: p.ph[0], href: "product.html?id=" + p.id }; }
+    var q = post(id); return q && { name: q.t, sub: "коллекция из группы ВК", img: q.ph[0], href: "idea.html?id=" + q.id };
+  }
+  function syncPick() {
+    var n = pickGet().length;
+    $$(".pick-ico").forEach(function (b) { b.hidden = !n; var c = $(".count", b); if (c) c.textContent = n; });
+    $$("[data-pick]").forEach(function (b) {
+      var on = pickHas(b.getAttribute("data-pick"));
+      b.classList.toggle("on", on);
+      if (b.classList.contains("heart")) { b.innerHTML = '<i class="ti ti-heart' + (on ? "-filled" : "") + '"></i>'; b.setAttribute("aria-label", on ? "Убрать из подборки" : "В подборку"); }
+      else if (b.hasAttribute("data-label")) b.innerHTML = '<i class="ti ti-heart' + (on ? "-filled" : "") + '"></i>' + (on ? "В подборке" : "В подборку");
     });
+    if ($(".drawer.show")) renderDrawer();
+  }
+  function renderDrawer() {
+    var a = pickGet();
+    fill(".drawer-list", a.length ? a.map(function (k) {
+      var it = pickItem(k); if (!it) return "";
+      return '<div class="pick"><a href="' + it.href + '">' + pic(it.img, it.name, true) + '</a><div><b><a href="' + it.href + '">' + tx(it.name) + "</a></b><span>" + tx(it.sub) + '</span></div><button data-unpick="' + k + '" aria-label="Убрать"><i class="ti ti-x"></i></button></div>';
+    }).join("") : '<p class="empty">Пока пусто. Нажмите ♡ на&nbsp;карточке товара или&nbsp;коллекции&nbsp;— и&nbsp;соберите всё для&nbsp;стен в&nbsp;одном списке.</p>');
+    var send = $(".drawer [data-send]");
+    if (send) {
+      var lines = a.map(function (k, i) { var it = pickItem(k); return it ? (i + 1) + ". " + it.name + " — " + it.sub : ""; }).filter(Boolean);
+      send.href = wa("Здравствуйте! Собрал(а) подборку на сайте, посчитайте, пожалуйста, количество и наличие:\n" + lines.join("\n"));
+      send.style.display = a.length ? "" : "none";
+    }
   }
 
-  /* ── подборка: хранится в браузере, если он разрешает ── */
-  var KEY = "martdecor-podborka", mem = [];
-  var pick = {
-    get: function () { try { var v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : mem; } catch (e) { return mem; } },
-    set: function (v) { mem = v; try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} },
-    has: function (id) { return pick.get().indexOf(id) >= 0; },
-    toggle: function (id) {
-      var v = pick.get().slice(), i = v.indexOf(id);
-      if (i >= 0) v.splice(i, 1); else v.push(id);
-      pick.set(v); syncPick();
-      return i < 0;
+  /* ——— шапка ——— */
+  function logo(sub) {
+    return '<a class="logo" href="index.html" aria-label="МАРТдекор — на главную"><span class="logo-word">' +
+      '<svg class="logo-arch" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M1 40 A49 39 0 0 1 99 40"/></svg>' +
+      "МАРТ<span>декор</span></span>" + (sub ? '<span class="logo-sub">Интерьерный салон</span>' : "") + "</a>";
+  }
+  function chrome() {
+    var cats = CATS.concat(window.EXTRA_CATS || []);
+    fill(".top", '<div class="wrap"><div class="top-bar">' + logo(false) +
+      '<nav class="nav" aria-label="Меню">' +
+        '<div><a href="catalog.html"' + (/catalog|category|product/.test(PAGE) ? ' class="on"' : "") + '>Материалы<i class="ti ti-chevron-down"></i></a><div class="drop">' +
+          cats.map(function (c) { return '<a href="category.html?c=' + c.id + '">' + c.name + "</a>"; }).join("") + '<a href="catalog.html"><b>Весь каталог</b></a></div></div>' +
+        '<div><a href="index.html#uslugi">Услуги<i class="ti ti-chevron-down"></i></a><div class="drop">' +
+          '<a href="index.html#uslugi">Подбор в&nbsp;салоне</a><a href="#" data-book="photo">Подбор по&nbsp;фото комнаты</a><a href="#" data-book="obekt">Выезд с&nbsp;образцами на&nbsp;объект</a><a href="index.html#koler">Колеровка</a><a href="index.html#pro">Дизайнерам и&nbsp;мастерам</a></div></div>' +
+        '<div><a href="projects.html"' + (/project/.test(PAGE) ? ' class="on"' : "") + ">Проекты</a></div>" +
+        '<div><a href="index.html#komanda">О&nbsp;салоне</a></div>' +
+        '<div><a href="index.html#kontakty">Контакты</a></div>' +
+      "</nav>" +
+      '<div class="top-icons">' +
+        '<a class="ico tg" href="' + SALON.tg + '" target="_blank" rel="noopener" aria-label="Телеграм"><i class="ti ti-brand-telegram"></i></a>' +
+        '<a class="ico wa" href="https://wa.me/' + SALON.wa + '" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>' +
+        '<button class="ico pick-ico" data-drawer hidden aria-label="Подборка"><i class="ti ti-heart"></i><span class="count">0</span></button>' +
+        '<button class="ico burger" aria-label="Меню"><i class="ti ti-menu-2"></i></button>' +
+      "</div>" +
+      '<button class="btn btn-main btn-sm" data-book="salon">Записаться на&nbsp;подбор' + ARROW + "</button>" +
+    "</div></div>");
+    var burger = $(".burger");
+    burger.addEventListener("click", function () {
+      var open = $(".nav").classList.toggle("open");
+      burger.innerHTML = '<i class="ti ti-' + (open ? "x" : "menu-2") + '"></i>';
+    });
+    $$(".nav a").forEach(function (a) { a.addEventListener("click", function () { if (!a.nextElementSibling) { $(".nav").classList.remove("open"); burger.innerHTML = '<i class="ti ti-menu-2"></i>'; } }); });
+    var top = $(".top");
+    window.addEventListener("scroll", function () { top.classList.toggle("scrolled", window.scrollY > 10); }, { passive: true });
+
+    fill(".foot", '<svg class="foot-leaf" viewBox="0 0 200 160" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M10 155 C60 120 100 80 150 20"/><path d="M45 128 C30 110 32 92 48 84 C58 100 56 116 45 128Z"/><path d="M70 106 C58 86 62 68 80 62 C88 80 84 96 70 106Z"/><path d="M95 82 C86 62 92 46 110 42 C116 60 110 74 95 82Z"/><path d="M118 56 C112 38 120 24 138 22 C140 40 132 52 118 56Z"/><path d="M60 118 C80 122 96 114 102 98 C84 94 68 102 60 118Z"/><path d="M86 94 C106 98 122 88 126 72 C108 70 92 78 86 94Z"/></svg>' +
+      '<div class="foot-grid">' +
+        "<div>" + logo(true) + '<p style="margin-top:22px;max-width:260px;font-size:14px;opacity:.8">Материалы для&nbsp;стен с&nbsp;подбором и&nbsp;расчётом. Ростов-на-Дону, с&nbsp;2018 года.</p></div>' +
+        '<div class="foot-col"><div><i class="ti ti-map-pin"></i><span>' + tx(SALON.address) + ",<br>" + tx(SALON.place) + '</span></div><div><i class="ti ti-clock"></i><span>Пн–пт 10:00–19:00<br>Сб–вс 10:00–17:00</span></div></div>' +
+        '<div class="foot-col"><div><i class="ti ti-phone"></i><a class="foot-tel" href="tel:' + SALON.tel + '">' + SALON.phone + "</a></div>" +
+          '<div class="msgs"><a href="https://wa.me/' + SALON.wa + '" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>WhatsApp</a><a href="' + SALON.tg + '" target="_blank" rel="noopener"><i class="ti ti-brand-telegram"></i>Telegram</a><a href="' + SALON.vk + '" target="_blank" rel="noopener"><i class="ti ti-brand-vk"></i>ВКонтакте</a></div>' +
+          '<div><i class="ti ti-message-circle"></i><span>Также пишите в&nbsp;MAX по&nbsp;номеру ' + SALON.phone + "</span></div></div>" +
+        '<nav class="foot-nav" aria-label="Разделы"><a href="catalog.html">Материалы</a><a href="index.html#uslugi">Услуги</a><a href="projects.html">Проекты</a><a href="ideas.html">Идеи для&nbsp;стен</a><a href="index.html#komanda">О&nbsp;салоне</a><a href="index.html#kontakty">Контакты</a></nav>' +
+      "</div>" +
+      '<div class="foot-bottom"><span>© МАРТдекор, 2018–2026</span><span>Сайт&nbsp;— Арина</span></div>');
+
+    document.body.insertAdjacentHTML("beforeend",
+      '<div class="veil"></div>' +
+      '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="book-h"><button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button>' +
+        '<h3 id="book-h">Записаться на&nbsp;подбор</h3><p class="sub">Выберите, как&nbsp;удобнее,&nbsp;— откроем чат с&nbsp;менеджером, сообщение уже будет написано.</p>' +
+        '<div class="opts">' +
+          '<label class="opt"><input type="radio" name="fmt" value="salon"><span><b>В&nbsp;салоне</b><span>Сравнить образцы рядом. Пр.&nbsp;Нагибина, 30Л, ДЦ WEST, цокольный этаж</span></span></label>' +
+          '<label class="opt"><input type="radio" name="fmt" value="obekt"><span><b>На&nbsp;объекте</b><span>Привезём образцы лепного декора и&nbsp;3D-панелей Orac&nbsp;— примерить прямо на&nbsp;стене</span></span></label>' +
+          '<label class="opt"><input type="radio" name="fmt" value="photo"><span><b>На&nbsp;расстоянии</b><span>Пришлите фото комнаты, проект или&nbsp;картинку из&nbsp;интернета</span></span></label>' +
+        "</div>" +
+        '<div class="btns"><a class="btn btn-main" data-go target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>Написать в&nbsp;WhatsApp</a><a class="btn btn-line" href="tel:' + SALON.tel + '"><i class="ti ti-phone"></i>Позвонить</a></div>' +
+        '<p class="hint">Пн–пт 10:00–19:00, сб–вс 10:00–17:00. Можно прийти и&nbsp;без&nbsp;записи, но&nbsp;на&nbsp;подбор по&nbsp;проекту лучше записаться&nbsp;— специалист подготовится.</p></div>' +
+      '<aside class="drawer" aria-label="Подборка"><button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button><h3>Подборка</h3>' +
+        '<p class="sub">На&nbsp;сайте ничего не&nbsp;оплачивают. Менеджер проверит наличие, посчитает количество и&nbsp;пришлёт счёт.</p>' +
+        '<div class="drawer-list"></div><div class="drawer-foot"><a class="btn btn-main" data-send target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>Отправить менеджеру</a><a class="btn btn-line" href="catalog.html">Смотреть материалы</a></div></aside>' +
+      '<div class="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button><button class="lb-nav lb-prev" aria-label="Предыдущее"><i class="ti ti-chevron-left"></i></button><img alt=""><button class="lb-nav lb-next" aria-label="Следующее"><i class="ti ti-chevron-right"></i></button><div class="lb-count"></div></div>' +
+      '<div class="toast" role="status"></div>');
+  }
+
+  /* ——— окна ——— */
+  var BOOK_TEXT = {
+    salon: "Здравствуйте! Хочу записаться на подбор материалов в салоне.",
+    obekt: "Здравствуйте! Хочу заказать выезд с образцами на объект.",
+    photo: "Здравствуйте! Хочу подобрать материалы по фото комнаты — пришлю фото."
+  };
+  function openBook(fmt) {
+    var r = $('.modal input[value="' + (fmt || "salon") + '"]'); if (r) r.checked = true;
+    syncBook(); $(".modal").classList.add("show"); $(".veil").classList.add("show");
+  }
+  function syncBook() { var v = ($(".modal input:checked") || {}).value || "salon"; $(".modal [data-go]").href = wa(BOOK_TEXT[v]); }
+  function openDrawer() { renderDrawer(); $(".drawer").classList.add("show"); $(".veil").classList.add("show"); }
+  function closeAll() { $$(".modal, .drawer, .veil").forEach(function (e) { e.classList.remove("show"); }); $(".lb").classList.remove("show"); document.body.style.overflow = ""; }
+  var LB = { list: [], i: 0 };
+  function openLb(list, i) { LB.list = list; LB.i = i || 0; showLb(); $(".lb").classList.add("show"); document.body.style.overflow = "hidden"; }
+  function showLb() { $(".lb img").src = src(LB.list[LB.i]); $(".lb-count").textContent = LB.list.length > 1 ? (LB.i + 1) + " / " + LB.list.length : ""; $$(".lb-nav").forEach(function (b) { b.style.display = LB.list.length > 1 ? "" : "none"; }); }
+  function stepLb(d) { LB.i = (LB.i + d + LB.list.length) % LB.list.length; showLb(); }
+  var toastT;
+  function toast(s) { var t = $(".toast"); t.textContent = s; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("show"); }, 1800); }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-book]"); if (b) { e.preventDefault(); openBook(b.getAttribute("data-book")); return; }
+    if (e.target.closest("[data-drawer]")) { openDrawer(); return; }
+    if (e.target.closest("[data-close]") || e.target.classList.contains("veil") || e.target.classList.contains("lb")) { closeAll(); return; }
+    var p = e.target.closest("[data-pick]"); if (p) { e.preventDefault(); pickToggle(p.getAttribute("data-pick")); return; }
+    var u = e.target.closest("[data-unpick]"); if (u) { var a = pickGet(); a.splice(a.indexOf(u.getAttribute("data-unpick")), 1); pickSet(a); return; }
+    var z = e.target.closest("[data-zoom]"); if (z) { var g = z.closest("[data-gal]"); openLb(g.getAttribute("data-gal").split(","), +z.getAttribute("data-zoom")); return; }
+    if (e.target.closest(".lb-prev")) { stepLb(-1); return; }
+    if (e.target.closest(".lb-next")) { stepLb(1); return; }
+    var q = e.target.closest(".faq-item button"); if (q) { var it = q.parentNode; it.classList.toggle("open"); q.setAttribute("aria-expanded", it.classList.contains("open")); }
+  });
+  document.addEventListener("change", function (e) { if (e.target.name === "fmt") syncBook(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeAll();
+    if ($(".lb.show")) { if (e.key === "ArrowLeft") stepLb(-1); if (e.key === "ArrowRight") stepLb(1); }
+  });
+
+  /* ——— карточки ——— */
+  function tiles(list) {
+    return list.map(function (c) {
+      return '<a class="tile" href="category.html?c=' + c.id + '">' + pic(c.tile, c.name, true) + "<span>" + c.br + ARROW + "</span></a>";
+    }).join("");
+  }
+  function good(p, full) {
+    var k = "p:" + p.id, href = "product.html?id=" + p.id;
+    var media = p.ph[0] ? '<a class="good-ph" href="' + href + '">' + pic(p.ph[0], p.name, true) + "</a>"
+      : '<a class="good-ph ph-empty" href="' + href + '" aria-label="' + esc(p.name) + '"><span>МАРТ<small>декор</small></span></a>';
+    return '<article class="good"><div class="good-media">' + media +
+      '<button class="heart" data-pick="' + k + '" aria-label="В подборку"><i class="ti ti-heart"></i></button></div>' +
+      (full ? '<span class="brand">' + tx(p.brand) + "</span>" : "") +
+      '<h3 class="name"><a href="' + href + '">' + tx(p.name) + "</a></h3>" +
+      (full ? '<div class="price">' + priceHTML(p) + '</div><p class="note">Наличие уточнит менеджер</p><button class="btn btn-line btn-xs" data-pick="' + k + '" data-label><i class="ti ti-heart"></i>В подборку</button>'
+            : '<span class="brand">' + tx(p.brand) + "</span>") + "</article>";
+  }
+  function collection(q) {
+    var href = "idea.html?id=" + q.id;
+    return '<article class="good"><div class="good-media"><a class="good-ph" href="' + href + '">' + pic(q.ph[0], q.t, true) + "</a>" +
+      '<button class="heart" data-pick="c:' + q.id + '" aria-label="В подборку"><i class="ti ti-heart"></i></button></div>' +
+      '<h3 class="name"><a href="' + href + '">' + tx(q.t) + '</a></h3><span class="brand">Коллекция в&nbsp;салоне · ' + date(q.d) + "</span></article>";
+  }
+  function excerpt(q, n) {
+    var s = q.x.filter(function (b) { return typeof b === "string"; }).join(" ");
+    if (s.length > n) s = s.slice(0, n).replace(/\s+\S*$/, "") + "…";
+    return s;
+  }
+  var TAGNAME = { lepnina: "Лепной декор", paneli: "Стеновые панели", shpon: "Каменный шпон", freski: "Фрески и панно", kraski: "Краски и штукатурки", oboi: "Обои" };
+  function art(q) {
+    var tag = q.kind === "project" ? "Проект" : q.kind === "event" ? "Событие" : (TAGNAME[q.tags[0]] || "Идеи");
+    return '<a class="art" href="idea.html?id=' + q.id + '">' + (q.ph[0] ? '<div class="art-ph">' + pic(q.ph[0], q.t, true) : '<div class="art-ph ph-empty"><span>МАРТ<small>декор</small></span>') + '</div><span class="tag">' + tag + " · " + date(q.d) + "</span><h3>" + tx(q.t) + "</h3><p>" + tx(excerpt(q, 120)) + "</p></a>";
+  }
+  function projCard(pr) {
+    return '<a class="proj" href="project.html?id=' + pr.id + '"><div class="proj-ph">' + pic(pr.cover, pr.title, true) + "</div><b>" + tx(pr.title) + "</b><span>" + tx(pr.who) + "</span></a>";
+  }
+  function faq(list) {
+    return '<div class="faq-list">' + list.map(function (f, i) {
+      return '<div class="faq-item"><button aria-expanded="false" aria-controls="fa' + i + '">' + tx(f[0]) + '<span class="pm" aria-hidden="true"></span></button><div class="faq-a" id="fa' + i + '"><div><p>' + tx(f[1]) + "</p></div></div></div>";
+    }).join("") + "</div>";
+  }
+  function gal(list, cls) {
+    return '<div class="' + cls + '" data-gal="' + list.join(",") + '">' + list.map(function (n, i) { return '<button data-zoom="' + i + '" aria-label="Открыть фото">' + pic(n, "", true) + "</button>"; }).join("") + "</div>";
+  }
+
+  /* часы и «открыто сейчас» — по времени Ростова (Москва) */
+  function nowRostov() {
+    try {
+      var s = new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", hour12: false, weekday: "short", hour: "numeric", minute: "numeric" });
+      var wd = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[s.slice(0, 3)];
+      var hm = s.match(/(\d+):(\d+)/); return { d: wd, h: (+hm[1] % 24) + hm[2] / 60 };
+    } catch (e) { var d = new Date(); return { d: d.getDay(), h: d.getHours() + d.getMinutes() / 60 }; }
+  }
+  function hoursTable() {
+    var names = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"], now = nowRostov();
+    return [1, 2, 3, 4, 5, 6, 0].map(function (d) { var h = SALON.hours[d]; return "<tr" + (d === now.d ? ' class="today"' : "") + "><td>" + names[d] + "</td><td>" + h[0] + ":00–" + h[1] + ":00</td></tr>"; }).join("");
+  }
+  function openNow() {
+    var n = nowRostov(), h = SALON.hours[n.d], open = n.h >= h[0] && n.h < h[1];
+    return '<span class="open-now' + (open ? "" : " closed") + '"><i></i>' + (open ? "Сейчас открыто до " + h[1] + ":00" : "Сейчас закрыто") + "</span>";
+  }
+
+  /* ——— страницы ——— */
+  var pages = {};
+  pages.home = function () {
+    fill("#tiles", tiles(CATS));
+    fill("#also", "<b>А&nbsp;ещё в&nbsp;салоне:</b>" + ALSO.map(function (a) { return '<span class="chip">' + tx(a) + "</span>"; }).join(""));
+    fill("#rooms", "<b>Подобрать по&nbsp;комнате:</b>" + ROOMS.map(function (r) { return '<a class="chip chip-ink" href="ideas.html?room=' + r.id + '">' + r.name + "</a>"; }).join(""));
+    var feat = (window.FEATURED || []).map(prod).filter(Boolean);
+    fill("#goods", feat.map(function (p) { return good(p, true); }).join(""));
+    fill("#projects", PROJECTS.slice(0, 3).map(projCard).join(""));
+    var r0 = REVIEWS[0];
+    fill("#revs", '<div class="rev-big"><q>' + tx(r0.text) + '</q><p class="rev-who"><b>' + tx(r0.name) + "</b> <span>· " + r0.date + "</span></p></div>" +
+      '<div class="rev-list">' + REVIEWS.slice(1).map(function (r) { return '<div class="rev"><p>«' + tx(r.text) + '»</p><p class="rev-who"><b>' + tx(r.name) + "</b> <span>· " + r.date + "</span></p></div>"; }).join("") + "</div>");
+    fill("#stories", STORIES.map(function (s) { return '<div class="story"><h4>' + tx(s.title) + "</h4><p>" + tx(s.text) + "</p><q>" + tx(s.quote) + '</q><span class="small muted">' + tx(s.who) + "</span></div>"; }).join(""));
+    fill("#people", TEAM.map(function (m) {
+      return '<figure class="person" style="margin:0"><div class="person-ph"><span class="ini">' + m.name[0] + '</span><span class="cap">Фото: ' + m.name + "</span></div><b>" + m.name + "</b><span>" + m.role + "</span><p>" + tx(m.text) + "</p></figure>";
+    }).join(""));
+    fill("#arts", (window.HOME_IDEAS || []).map(post).filter(Boolean).map(art).join(""));
+    fill("#hours", hoursTable());
+    fill("#open", openNow());
+    fill("#faq", faq(FAQ));
+  };
+  pages.styleguide = function () {
+    fill("#sg-good", (window.FEATURED || []).slice(0, 2).map(prod).filter(Boolean).map(function (p) { return good(p, true); }).join(""));
+  };
+  pages.catalog = function () {
+    fill("#tiles", tiles(CATS));
+    var ex = window.EXTRA_CATS || [];
+    fill("#extra", ex.map(function (c) {
+      return '<a class="extra" href="category.html?c=' + c.id + '">' + pic(c.tile, c.name, true) + '<div><span class="eyebrow">А&nbsp;ещё в&nbsp;салоне</span><b>' + c.name + "</b><p>" + tx(c.lead) + '</p></div><span class="link-more">Смотреть ' + ARROW + "</span></a>";
+    }).join(""));
+    fill("#also", "<b>А&nbsp;ещё в&nbsp;салоне:</b>" + ALSO.map(function (a) { return '<span class="chip">' + tx(a) + "</span>"; }).join(""));
+  };
+  pages.category = function () {
+    var c = cat(param("c")) || CATS[0];
+    document.title = c.name + " — МАРТдекор, Ростов-на-Дону";
+    fill("#crumb", c.name);
+    fill("#cat-h", c.name); fill("#cat-lead", tx(c.lead));
+    fill("#cat-ph", pic(c.hero, c.name, false, true));
+    var items = PRODS.filter(function (p) { return p.cat === c.id; });
+    var cols = POSTS_.filter(function (q) { return q.kind !== "event" && q.tags.indexOf(c.id) >= 0 && q.ph.length; });
+    // чипсы: подразделы товаров или темы коллекций
+    var chips = [];
+    if (items.length) {
+      items.forEach(function (p) { if (chips.indexOf(p.sub) < 0) chips.push(p.sub); });
+      chips = chips.map(function (s) { return { name: s, test: function (p) { return p.sub === s; } }; });
+    } else {
+      chips = (c.chips || []).map(function (ch) { var rx = new RegExp(ch[1], "i"); return { name: ch[0], test: function (q) { return rx.test(q.t + " " + q.x.join(" ")); } }; })
+        .filter(function (ch) { return cols.some(ch.test); });
+    }
+    var list = items.length ? items : cols, card = items.length ? function (p) { return good(p, false); } : collection;
+    var cur = -1, shown = PER;
+    function draw() {
+      var arr = cur < 0 ? list : list.filter(chips[cur].test);
+      fill("#chips", '<button class="chip' + (cur < 0 ? " on" : "") + '" data-chip="-1">Все</button>' + chips.map(function (ch, i) { return '<button class="chip' + (cur === i ? " on" : "") + '" data-chip="' + i + '">' + tx(ch.name) + "</button>"; }).join(""));
+      fill("#count", items.length ? arr.length + " " + plural(arr.length, "товар", "товара", "товаров") + ". Цены&nbsp;— «от», наличие и&nbsp;сроки уточнит менеджер."
+        : "Коллекции и&nbsp;новинки салона. Цену, наличие и&nbsp;сроки уточнит менеджер.");
+      fill("#grid", arr.slice(0, shown).map(card).join("") || '<p class="empty">Здесь пока пусто</p>');
+      fill("#more", arr.length > shown ? '<button class="btn btn-line">Показать ещё ' + Math.min(PER, arr.length - shown) + "</button>" : "");
+      syncPick();
+    }
+    document.addEventListener("click", function (e) {
+      var ch = e.target.closest("[data-chip]"); if (ch) { cur = +ch.getAttribute("data-chip"); shown = PER; draw(); }
+      if (e.target.closest("#more button")) { shown += PER; draw(); }
+    });
+    draw();
+    // идеи с этим материалом — если в разделе есть товары, показываем ещё и посты
+    if (items.length && cols.length) {
+      $("#ideas-box").hidden = false;
+      fill("#ideas", cols.slice(0, 4).map(art).join(""));
+      fill("#ideas-more", '<a class="link-more" href="ideas.html?c=' + c.id + '">Все идеи раздела ' + ARROW + "</a>");
     }
   };
-
-  var LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true">' +
-    '<path d="M4 38V18A16 16 0 0 1 20 2v36z" fill="#6b1e2b"/>' +
-    '<path d="M20 2a16 16 0 0 1 16 16v20H20z" fill="#b9ada1"/>' +
-    '<path d="M10 38V21a10 10 0 0 1 20 0v17z" fill="#f5f0e8"/>' +
-    '<path d="M13 38V23a7 7 0 0 1 7-7v22z" fill="#7d9682"/>' +
-    '<rect x="23" y="21" width="2" height="17" fill="#1f1a19"/><rect x="27" y="23" width="2" height="15" fill="#1f1a19"/></svg>';
-
-  function waLink(kind, extra) {
-    return "https://wa.me/" + SALON.wa + "?text=" + encodeURIComponent((SALON.waText[kind] || SALON.waText.foto) + (extra || ""));
-  }
-  function bindWa(root) {
-    $$("[data-wa]", root).forEach(function (a) {
-      a.href = waLink(a.getAttribute("data-wa"), a.getAttribute("data-wa-extra"));
-      a.target = "_blank"; a.rel = "noopener";
+  function plural(n, a, b, c) { var m = n % 100, k = n % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
+  pages.product = function () {
+    var p = prod(param("id")) || PRODS[0]; if (!p) return;
+    var c = cat(p.cat);
+    document.title = p.name + " — МАРТдекор";
+    fill("#crumbs", '<a href="index.html">Главная</a><span><a href="catalog.html">Материалы</a></span><span><a href="category.html?c=' + c.id + '">' + c.name + "</a></span><span>" + tx(p.name) + "</span>");
+    var ph = p.ph;
+    if (!ph.length) { fill("#gallery", '<div class="gal-main ph-empty"><span>МАРТ<small>декор</small></span></div><p class="small muted" style="margin-top:10px">Фото этой позиции пришлёт менеджер.</p>'); }
+    else fill("#gallery", '<div class="gal-main" data-gal="' + ph.join(",") + '"><span data-zoom="0">' + pic(ph[0], p.name, false, true) + "</span></div>" +
+      (ph.length > 1 ? '<div class="gal-thumbs">' + ph.map(function (n, i) { return '<button' + (i ? "" : ' class="on"') + ' data-thumb="' + i + '" aria-label="Фото ' + (i + 1) + '">' + pic(n, "", true) + "</button>"; }).join("") + "</div>" : ""));
+    $("#gallery").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-thumb]"); if (!b) return;
+      var i = +b.getAttribute("data-thumb"); $(".gal-main img").src = src(ph[i]); $(".gal-main [data-zoom]").setAttribute("data-zoom", i);
+      $$(".gal-thumbs button").forEach(function (x) { x.classList.toggle("on", x === b); });
     });
-  }
-
-  /* ── шапка, подвал, панели подборки и записи ── */
-  function chrome() {
-    var nav = [["catalog.html", "Каталог", "catalog"], ["index.html#podbor", "Как подбираем", ""],
-      ["index.html#sovety", "Советы", "article"], ["index.html#kontakty", "Контакты", ""]];
-    fill($("#top"), '<div class="wrap top-in">' +
-      '<a class="logo" href="index.html">' + LOGO + '<span class="logo-t"><b>МАРТдекор</b><span>интерьерный салон</span></span></a>' +
-      '<nav class="nav">' + nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[2] && n[2] === page ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("") +
-      '<a class="pro-link" href="index.html#pro">Дизайнерам и мастерам</a></nav>' +
-      '<div class="top-r"><a class="top-phone" href="tel:' + SALON.tel + '">' + SALON.phone + "</a>" +
-      '<button class="btn btn-filled btn-sm top-book" data-book="salon">Записаться</button>' +
-      '<button class="pick-btn" data-drawer><i class="ti ti-bookmark"></i>Подборка <span class="n" data-count>0</span></button></div></div>');
-
-    fill($("#foot"), '<div class="wrap"><div class="foot-in">' +
-      '<div><a class="logo" href="index.html">' + LOGO + '<span class="logo-t"><b>МАРТдекор</b><span>интерьерный салон с 2018 года</span></span></a>' +
-      '<p class="small" style="margin-top:18px;max-width:22em">Обои, фрески, стеновые панели, каменный шпон, краски и лепной декор. Подбор под ваш интерьер.</p></div>' +
-      '<div><h4>Салон</h4><ul><li>' + SALON.address + '</li><li>Пн–пт 10:00–19:00</li><li>Сб–вс 10:00–17:00</li></ul></div>' +
-      '<div><h4>Связаться</h4><ul><li><a href="tel:' + SALON.tel + '">' + SALON.phone + '</a></li><li>WhatsApp, Telegram, MAX</li><li><a href="mailto:info@martdecor.ru">info@martdecor.ru</a></li></ul></div>' +
-      '<div><h4>Разделы</h4><ul>' + SECTIONS.map(function (s) { return '<li><a href="catalog.html?sec=' + s.id + '">' + s.name + "</a></li>"; }).join("") + "</ul></div>" +
-      '</div><div class="foot-note"><span>ИП Арийская Людмила Руслановна · ОГРНИП 319619600052602</span>' +
-      "<span>Прототип подготовила Арина · наличие показано для примера, фото — заглушки</span></div></div>");
-
-    var d = document.createElement("div");
-    d.innerHTML = '<div class="shade" data-close></div><aside class="drawer pick" aria-label="Подборка">' +
-      '<div class="dr-head"><div><h3>Ваша подборка</h3><p>Менеджер проверит наличие, рассчитает количество и пришлёт счёт. На сайте оплачивать не нужно.</p></div>' +
-      '<button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button></div>' +
-      '<div class="dr-body" data-list></div><div class="dr-foot" data-form></div></aside>' +
-      '<aside class="drawer book" aria-label="Запись на подбор">' +
-      '<div class="dr-head"><div><h3>Запись на подбор</h3><p>Менеджер свяжется с вами, уточнит задачу и предложит время.</p></div>' +
-      '<button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button></div>' +
-      '<div class="dr-body" data-book-body></div></aside>';
-    document.body.appendChild(d);
-    typoTree(d);
-
-    document.addEventListener("click", function (e) {
-      var t = e.target.closest("[data-drawer],[data-close],[data-add],[data-del],[data-book]");
-      if (!t) return;
-      if (t.hasAttribute("data-drawer")) { renderDrawer(); document.body.classList.add("drawer-open"); }
-      if (t.hasAttribute("data-close")) document.body.classList.remove("drawer-open", "book-open");
-      if (t.hasAttribute("data-add")) { e.preventDefault(); pick.toggle(t.getAttribute("data-add")); }
-      if (t.hasAttribute("data-del")) { pick.toggle(t.getAttribute("data-del")); renderDrawer(); }
-      if (t.hasAttribute("data-book")) {
-        e.preventDefault();
-        document.body.classList.remove("drawer-open");
-        renderBook(t.getAttribute("data-book"));
-        document.body.classList.add("book-open");
-      }
-    });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.body.classList.remove("drawer-open", "book-open"); });
-  }
-
-  /* ── запись на подбор: формат выбран кнопкой, с которой пришли ── */
-  function renderBook(format) {
-    fill($("[data-book-body]"), '<form data-book-form class="book-form">' +
-      '<label class="field">Как удобнее подобрать<select data-format>' +
-      '<option value="salon">В салоне</option><option value="obekt">На объекте — выезд с образцами</option>' +
-      '<option value="foto">На расстоянии — по фото или проекту</option></select></label>' +
-      '<div class="row2"><label class="field">Имя<input required placeholder="Как к вам обращаться"></label>' +
-      '<label class="field">Телефон<input required type="tel" placeholder="+7"></label></div>' +
-      '<label class="field">Когда удобно<input placeholder="Например, в субботу после 12"></label>' +
-      '<label class="field">Куда ответить<select><option>WhatsApp</option><option>Telegram</option><option>MAX</option><option>Позвонить</option></select></label>' +
-      '<label class="field">Что подбираем<textarea placeholder="Комната, площадь стен, есть ли дизайн-проект"></textarea></label>' +
-      '<button class="btn btn-filled" style="width:100%" type="submit"><i class="ti ti-send"></i>Отправить заявку</button>' +
-      '<p class="small muted">Фото комнаты или проект можно сразу прислать в <a data-wa="foto" href="#">WhatsApp</a>.</p></form>');
-    var sel = $("[data-format]");
-    if (sel && format) sel.value = format;
-    bindWa($("[data-book-body]"));
-    $("[data-book-form]").addEventListener("submit", function (e) {
-      e.preventDefault();
-      fill($("[data-book-body]"), '<div class="ok"><b>Заявка отправлена — это демо</b>В рабочей версии она придёт менеджеру салона, а он свяжется с вами и предложит время.</div>' +
-        '<div class="need"><i class="ti ti-help-circle"></i><span><b>Нужно от вас:</b> куда удобнее получать заявки с сайта — WhatsApp, Telegram, MAX или почта.</span></div>');
-    });
-  }
-
-  function syncPick() {
-    var v = pick.get();
-    $$("[data-count]").forEach(function (el) { el.textContent = v.length; });
-    $$("[data-add]").forEach(function (b) {
-      var on = v.indexOf(b.getAttribute("data-add")) >= 0;
-      b.classList.toggle("on", on);
-      if (b.classList.contains("add")) {
-        b.innerHTML = '<i class="ti ti-' + (on ? "check" : "plus") + '"></i>';
-        b.setAttribute("aria-label", on ? "Убрать из подборки" : "Добавить в подборку");
-      } else if (b.hasAttribute("data-label")) {
-        b.innerHTML = '<i class="ti ti-' + (on ? "check" : "bookmark") + '"></i>' + typo(on ? "В подборке" : b.getAttribute("data-label"));
-      }
-    });
-  }
-
-  function renderDrawer() {
-    var v = pick.get();
-    fill($("[data-list]"), v.length ? v.map(function (id) {
-      var it = item(id); if (!it) return "";
-      return '<div class="dr-item"><div class="ph t-' + sec(it.sec).tone + '"></div><div><b>' + esc(it.name) + "</b><span>" + priceText(it) + "</span></div>" +
-        '<button data-del="' + it.id + '" aria-label="Убрать"><i class="ti ti-trash"></i></button></div>';
-    }).join("") : '<div class="empty">Пока пусто. Добавляйте материалы кнопкой <b>+</b> в каталоге — соберём всё в одну заявку.</div>');
-    fill($("[data-form]"), v.length ? '<form data-send>' +
-      '<div class="row2"><label class="field">Имя<input required placeholder="Как к вам обращаться"></label>' +
-      '<label class="field">Телефон<input required type="tel" placeholder="+7"></label></div>' +
-      '<label class="field" style="margin-top:12px">Куда ответить<select><option>WhatsApp</option><option>Telegram</option><option>MAX</option><option>Позвонить</option></select></label>' +
-      '<label class="field" style="margin-top:12px">Комментарий<textarea placeholder="Комната, площадь стен, есть ли дизайн-проект"></textarea></label>' +
-      '<label class="check" style="margin-top:8px"><input type="checkbox"> Нужны образцы на объект</label>' +
-      '<button class="btn btn-filled" style="width:100%;margin-top:12px" type="submit"><i class="ti ti-send"></i>Отправить менеджеру</button></form>' : "");
-    var f = $("[data-send]");
-    if (f) f.addEventListener("submit", function (e) {
-      e.preventDefault();
-      fill($("[data-form]"), '<div class="ok"><b>Подборка отправлена — это демо</b>В рабочей версии она придёт менеджеру салона, а он ответит туда, куда вы выбрали.</div>' +
-        '<div class="need"><i class="ti ti-help-circle"></i><span><b>Нужно от вас:</b> куда удобнее получать заявки с сайта — WhatsApp, Telegram, MAX или почта.</span></div>');
-    });
-  }
-
-  /* ── цена, статус, карточка ── */
-  function priceText(it) { return it.price ? "от " + money(it.price) + " ₽" + (it.unit ? " " + it.unit : "") : "Цена по запросу"; }
-  function priceHTML(it) { return it.price ? "от " + money(it.price) + NB + "₽" + (it.unit ? "<small>" + it.unit + "</small>" : "") : "Цена по запросу"; }
-  function statusHTML(it) {
-    var t = { "in": "В наличии", few: "Количество ограничено", order: "Под заказ" }[it.status];
-    return '<span class="status ' + it.status + '">' + t + "</span>";
-  }
-  function card(it) {
-    var s = sec(it.sec);
-    return '<article class="item"><a href="item.html?id=' + it.id + '" class="ph t-' + s.tone + '" style="text-decoration:none">' +
-      '<span class="ph-cap"><i class="ti ti-photo"></i>Фото товара</span></a>' +
-      '<div class="meta"><span>' + esc(it.group) + "</span>" + statusHTML(it) + "</div>" +
-      '<h3><a href="item.html?id=' + it.id + '">' + esc(it.name) + "</a></h3>" +
-      '<p class="line">' + esc(it.line) + "</p>" +
-      '<div class="bottom"><span class="price">' + priceHTML(it) + "</span>" +
-      '<button class="add" data-add="' + it.id + '" aria-label="Добавить в подборку"><i class="ti ti-plus"></i></button></div></article>';
-  }
-  function minPrice(secId) {
-    var p = ITEMS.filter(function (i) { return i.sec === secId && i.price; }).map(function (i) { return i.price; });
-    return p.length ? Math.min.apply(null, p) : 0;
-  }
-
-  /* ── открыто сейчас: время Ростова совпадает с московским ── */
-  function openNow() {
-    var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
-    var day = d.getDay(), h = d.getHours() + d.getMinutes() / 60, today = SALON.hours[day];
-    var open = h >= today[0] && h < today[1];
-    var text;
-    if (open) text = "Открыто до " + today[1] + ":00";
-    else if (h < today[0]) text = "Откроется сегодня в " + today[0] + ":00";
-    else text = "Откроется завтра в " + SALON.hours[(day + 1) % 7][0] + ":00";
-    $$("[data-open]").forEach(function (el) {
-      el.classList.toggle("closed", !open);
-      var t = $(".t", el) || el; t.textContent = typo(text);
-    });
-    var tb = $("#hours");
-    if (tb) {
-      var wk = day >= 1 && day <= 5;
-      fill(tb, [["Понедельник — пятница", 1, wk], ["Суббота и воскресенье", 6, !wk]].map(function (g) {
-        return "<tr" + (g[2] ? ' class="today"' : "") + "><td>" + g[0] + (g[2] ? " · сегодня" : "") + "</td><td>" + SALON.hours[g[1]][0] + ":00–" + SALON.hours[g[1]][1] + ":00</td></tr>";
-      }).join(""));
+    fill("#info", '<span class="brand">' + tx(p.brand) + "</span><h1>" + tx(p.name) + "</h1>" +
+      '<div class="item-price">' + priceHTML(p) + (p.old ? ' <s class="muted" style="font-size:20px">' + money(p.old) + NB + "₽</s>" : "") + "</div>" +
+      '<p class="item-note"><i class="ti ti-circle-check"></i>Наличие и&nbsp;сроки уточнит менеджер</p>' +
+      '<div class="btns"><button class="btn btn-main" data-pick="p:' + p.id + '" data-label><i class="ti ti-heart"></i>В подборку</button>' +
+      '<a class="btn btn-line" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу посмотреть образец: " + p.name + " — " + location.href) + '"><i class="ti ti-box"></i>Хочу образец</a></div>' +
+      '<table class="specs" style="margin-top:28px">' + p.specs.map(function (s) { return "<tr><td>" + tx(s[0]) + "</td><td>" + tx(s[1]) + "</td></tr>"; }).join("") + "</table>" +
+      (p.desc.length ? '<div class="item-desc">' + p.desc.map(block).join("") + "</div>" : ""));
+    calc(p);
+    var rel = PRODS.filter(function (x) { return x.sub === p.sub && x.id !== p.id; }).slice(0, 4);
+    if (rel.length < 4) rel = rel.concat(PRODS.filter(function (x) { return x.cat === p.cat && x.sub !== p.sub; }).slice(0, 4 - rel.length));
+    fill("#related", rel.map(function (x) { return good(x, false); }).join(""));
+  };
+  function calc(p) {
+    var box = $("#calc"); if (!box) return;
+    var head = '<h3>Сколько понадобится</h3>';
+    if (!p.calc || !p.price) {
+      fill(box, head + '<p class="muted small">Для&nbsp;этой позиции количество считает менеджер: пришлите размеры стены или&nbsp;проект.</p><div class="row"><a class="btn btn-line btn-sm" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Посчитайте, пожалуйста, сколько нужно: " + p.name) + '"><i class="ti ti-brand-whatsapp"></i>Попросить расчёт</a></div>');
+      return;
     }
+    var k = p.calc, m2 = k.per === "m2";
+    var hint = m2 ? "Цена указана за м²." : "Одна панель — " + String(k.area).replace(".", ",") + "&nbsp;м² (по&nbsp;размерам из&nbsp;карточки).";
+    fill(box, head + '<p class="muted small">' + hint + " Точный расчёт с&nbsp;учётом раскладки, углов и&nbsp;проёмов сделает менеджер.</p>" +
+      '<div class="row"><label>Площадь стены, м²<input type="number" inputmode="decimal" min="0" step="0.1" value="10" id="c-a"></label><label>Запас, %<input type="number" inputmode="numeric" min="0" max="50" step="1" value="10" id="c-r"></label></div><p class="res" id="c-res"></p>');
+    function upd() {
+      var a = parseFloat(String($("#c-a").value).replace(",", ".")) || 0, r = (parseFloat($("#c-r").value) || 0) / 100;
+      if (!a) { fill("#c-res", "Введите площадь стены"); return; }
+      if (m2) { var s = Math.ceil(a * (1 + r) * 10) / 10; fill("#c-res", "<b>" + String(s).replace(".", ",") + "&nbsp;м²</b> &nbsp;≈&nbsp;" + money(s * p.price) + "&nbsp;₽ по&nbsp;цене «от»"); return; }
+      var n = Math.ceil(a * (1 + r) / k.area - 1e-9);
+      fill("#c-res", "<b>" + n + "&nbsp;шт.</b> &nbsp;≈&nbsp;" + money(n * p.price) + "&nbsp;₽, если цена указана за&nbsp;штуку");
+    }
+    box.addEventListener("input", upd); upd();
   }
-
-  /* ── появление при прокрутке ── */
-  function reveal() {
-    if (!("IntersectionObserver" in window)) return;
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("rise"); io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px 80px 0px" });
-    $$(".sec-card, .item, .step, .rev, .art, .way, .person, .calm > div, .story").forEach(function (el) {
-      if (el.getBoundingClientRect().top > innerHeight) io.observe(el);
-    });
-  }
-
-  /* ── главная ── */
-  function home() {
-    typoTree($("main"));
-    fill($("#secs"), SECTIONS.map(function (s) {
-      var p = minPrice(s.id);
-      return '<a class="sec-card" href="catalog.html?sec=' + s.id + '"><div class="ph t-' + s.tone + '"></div><div>' +
-        "<h3>" + s.name + "</h3><p>" + esc(s.fact) + "</p>" +
-        (p ? '<div class="from">В выборке от ' + money(p) + NB + "₽</div>" : "") +
-        '<span class="go">Смотреть <i class="ti ti-arrow-right"></i></span></div></a>';
-    }).join(""));
-    var feat = ["px175", "dp151", "d1132", "dblack", "santorini", "gelios", "struct", "s20065"];
-    fill($("#featured"), feat.map(function (id) { return card(item(id)); }).join(""));
-    fill($("#stories"), STORIES.map(function (s) {
-      return '<article class="story"><div class="ph t-' + s.tone + '"><span class="ph-cap"><i class="ti ti-photo"></i>Фото работы</span></div>' +
-        "<h3>" + esc(s.title) + "</h3><p>" + esc(s.text) + "</p><blockquote>«" + esc(s.quote) + "»</blockquote>" +
-        '<div class="who">' + esc(s.who) + ", " + s.date + ", Яндекс Карты</div></article>";
-    }).join(""));
-    fill($("#revs"), REVIEWS.map(function (r) {
-      return '<figure class="rev" style="margin:0"><blockquote>' + esc(r.text) + '</blockquote><figcaption><div class="who">' + esc(r.name) +
-        '</div><div class="when">' + r.date + ", Яндекс Карты</div></figcaption></figure>";
-    }).join(""));
-    var tones = { traversee: "ink", classic: "stone", nature: "sage" };
-    fill($("#arts"), ARTICLES.map(function (a) {
-      return '<a class="art" href="article.html?id=' + a.id + '"><div class="ph t-' + tones[a.id] + '"><span class="ph-cap"><i class="ti ti-photo"></i>Фото интерьера из поста</span></div>' +
-        '<span class="tag">' + a.tag + "</span><h3>" + esc(a.title) + "</h3><p>" + esc(a.lead) + "</p></a>";
-    }).join(""));
-    fill($("#faqs"), FAQ.map(function (f, i) {
-      return "<details" + (i === 0 ? " open" : "") + "><summary>" + esc(f[0]) + '<i class="ti ti-plus"></i></summary><p>' + esc(f[1]) + "</p></details>";
-    }).join(""));
-  }
-
-  /* ── каталог ── */
-  function catalog() {
-    var st = { sec: params.get("sec") || "", q: "", paint: false, ru: false, price: "" };
-    fill($("#tabs"), '<button class="tab" data-sec="">Все разделы</button>' + SECTIONS.map(function (s) {
-      return '<button class="tab" data-sec="' + s.id + '">' + s.name + "</button>";
-    }).join(""));
+  pages.projects = function () {
+    fill("#projects", PROJECTS.map(projCard).join(""));
+    var shown = 40, G = window.GALLERY || [];
     function draw() {
-      $$("#tabs .tab").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-sec") === st.sec); });
-      var s = sec(st.sec);
-      $("#cat-title").textContent = s ? s.name : "Каталог";
-      fill($("#cat-sub"), s ? s.fact + ". Здесь — выборка из нескольких позиций, чтобы показать, как будет устроен раздел." :
-        "Шесть разделов салона. В прототипе — по 2–3 позиции в каждом, в каталоге салона их 84" + NB + "797.");
-      /* ищем по началу каждого слова: «карнизы» найдут «карниз», «лепнина» — раздел «Лепной декор» */
-      var q = st.q.trim().toLowerCase().split(/\s+/).filter(Boolean).map(function (w) { return w.slice(0, 5); });
-      var list = ITEMS.filter(function (it) {
-        if (st.sec && it.sec !== st.sec) return false;
-        if (q.length) {
-          var is = sec(it.sec), hay = (it.name + " " + it.brand + " " + it.group + " " + (is ? is.name + " " + is.words : "")).toLowerCase();
-          if (q.some(function (w) { return hay.indexOf(w) < 0; })) return false;
-        }
-        if (st.paint && !it.paint) return false;
-        if (st.ru && !it.ru) return false;
-        if (st.price === "lt1000" && !(it.price && it.price < 1000)) return false;
-        if (st.price === "lt10000" && !(it.price && it.price < 10000)) return false;
-        if (st.price === "gt10000" && !(it.price >= 10000)) return false;
-        return true;
-      });
-      fill($("#cat-count"), "Показано " + list.length + " из " + ITEMS.length + " позиций выборки");
-      fill($("#cat-items"), list.length ? list.map(card).join("") :
-        '<div class="empty" style="grid-column:1/-1">Ничего не нашлось. Попробуйте другое слово или снимите фильтр — или спросите менеджера: в салоне более 90 брендов.</div>');
-      syncPick();
-      glueTails($("#cat-items"));
+      fill("#gallery", gal(G.slice(0, shown), "masonry"));
+      fill("#more", G.length > shown ? '<button class="btn btn-line">Показать ещё</button>' : "");
     }
-    $("#tabs").addEventListener("click", function (e) {
-      var b = e.target.closest(".tab"); if (!b) return;
-      st.sec = b.getAttribute("data-sec");
-      history.replaceState(null, "", st.sec ? "?sec=" + st.sec : location.pathname);
-      draw();
-    });
-    $("#q").addEventListener("input", function (e) { st.q = e.target.value; draw(); });
-    $("#f-paint").addEventListener("change", function (e) { st.paint = e.target.checked; draw(); });
-    $("#f-ru").addEventListener("change", function (e) { st.ru = e.target.checked; draw(); });
-    $$("input[name=price]").forEach(function (r) { r.addEventListener("change", function () { st.price = r.value; draw(); }); });
+    document.addEventListener("click", function (e) { if (e.target.closest("#more button")) { shown += 40; draw(); } });
     draw();
+    fill("#g-count", G.length + " " + plural(G.length, "фотография", "фотографии", "фотографий"));
+  };
+  pages.project = function () {
+    var pr = byId(PROJECTS, param("id")) || PROJECTS[0], q = post(pr.id);
+    document.title = pr.title + " — проекты МАРТдекор";
+    fill("#hero", pic(pr.cover, pr.title, false, true) + '<div class="cap"><span class="eyebrow" style="color:rgba(255,255,255,.8)">Проект · ' + tx(pr.who) + "</span><h1>" + tx(pr.title) + "</h1></div>");
+    fill("#crumb", tx(pr.title));
+    fill("#text", (q ? (q.x.map(block).join("")) : "") + '<p class="src">' + (q ? date(q.d) + " · " : "") + '<a href="https://vk.ru/wall-53471837_' + pr.id + '" target="_blank" rel="noopener">Обсудить во&nbsp;ВКонтакте</a></p>');
+    fill("#mats", "<h3 class=\"h3\" style=\"font-size:26px;margin-bottom:8px\">Что использовали</h3><ul>" + pr.mats.map(function (m) { return '<li><i class="ti ti-point-filled"></i><span>' + tx(m) + "</span></li>"; }).join("") + "</ul>");
+    if (q && q.ph.length) fill("#minigal", gal(q.ph, "minigal"));
+    fill("#others", PROJECTS.filter(function (x) { return x.id !== pr.id; }).slice(0, 3).map(projCard).join(""));
+  };
+  // короткие строки КАПСОМ в постах — это подзаголовки: показываем их обычным регистром
+  function capsHead(s) {
+    var L = s.replace(/[^A-Za-zА-Яа-яЁё]/g, "");
+    return s.length < 70 && L.length > 3 && L.replace(/[^A-ZА-ЯЁ]/g, "").length / L.length > .7;
   }
-
-  /* ── карточка позиции ── */
-  function product() {
-    var it = item(params.get("id")) || ITEMS[0], s = sec(it.sec);
-    document.title = it.name + " — МАРТдекор";
-    var calc = "";
-    if (it.calc && it.price) {
-      calc = '<div class="calc"><h3>Сколько понадобится</h3><p class="small muted">Ориентир по данным карточки, без запаса на подрезку и раппорт. Точный расчёт сделает менеджер салона.</p>' +
-        '<div class="calc-row"><span>Площадь стен</span><input type="range" min="1" max="60" value="12" id="area"><span class="area" id="area-v">12 м²</span></div>' +
-        '<div class="calc-out"><div><b id="c-qty"></b><span>количество</span></div><div><b id="c-sum"></b><span>ориентир по цене</span></div></div></div>';
-    }
-    fill($("#crumbs"), '<a href="index.html">Главная</a> / <a href="catalog.html">Каталог</a> / <a href="catalog.html?sec=' + s.id + '">' + s.name + "</a>");
-    fill($("#pd"), '<div class="pd-gal"><div class="ph t-' + s.tone + '"><span class="ph-cap"><i class="ti ti-photo"></i>Фото в интерьере</span></div>' +
-      '<div class="ph t-' + s.tone + '"><span class="ph-cap">Фактура крупно</span></div><div class="ph t-' + s.tone + '"><span class="ph-cap">Образец в салоне</span></div></div>' +
-      '<div><span class="eyebrow">' + esc(it.brand) + " · " + esc(it.group) + "</span><h1>" + esc(it.name) + '</h1><p class="line">' + esc(it.line) + "</p>" +
-      '<div class="pd-buy"><span class="price">' + priceHTML(it) + "</span>" + statusHTML(it) + '<span class="small muted">наличие — для примера</span></div>' +
-      '<div class="pd-actions"><button class="btn btn-filled" data-add="' + it.id + '" data-label="Добавить в подборку"><i class="ti ti-bookmark"></i>Добавить в подборку</button>' +
-      '<button class="btn btn-ghost" data-drawer><i class="ti ti-ruler-measure"></i>Расчёт и образец</button></div>' +
-      '<p class="pd-live"><i class="ti ti-eye"></i>Хотите увидеть вживую? <button class="link" data-book="salon">Запишитесь в салон</button> или ' +
-      '<a data-wa="item" data-wa-extra="' + esc(it.name) + '" href="#">спросите в WhatsApp</a></p>' + calc +
-      '<table class="specs">' + it.specs.map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; }).join("") +
-      (it.fits ? "<tr><td>Где применяют</td><td>" + esc(it.fits) + "</td></tr>" : "") + "</table>" +
-      '<div class="pc"><div class="plus"><h4>Чем хорош</h4><ul>' + it.pros.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>" +
-      '<div class="minus"><h4>Что учесть</h4><ul>' + it.needs.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div></div>" +
-      '<p class="source">Источник: <a href="' + (it.src.indexOf("http") === 0 ? it.src.split(" ")[0] : "#") + '" target="_blank" rel="noopener">' + esc(it.src) + "</a></p></div>");
-    var more = ITEMS.filter(function (i) { return i.sec === it.sec && i.id !== it.id; });
-    fill($("#more"), more.map(card).join(""));
-    if (calc) {
-      var area = $("#area");
-      var upd = function () {
-        var a = +area.value, c = it.calc, qty, sum;
-        $("#area-v").textContent = a + NB + "м²";
-        if (c.per === "m2") { qty = a + NB + "м²"; sum = a * it.price; }
-        else if (c.per === "pcs") { var n = Math.ceil(a * c.k); qty = money(n) + NB + c.label; sum = n * it.price; }
-        else { var u = Math.ceil(a / c.k); qty = u + NB + c.label; sum = u * it.price; }
-        $("#c-qty").textContent = qty;
-        $("#c-sum").textContent = "≈" + NB + money(sum) + NB + "₽";
-      };
-      area.addEventListener("input", upd); upd();
-    }
+  function block(b) {
+    if (typeof b === "string" && capsHead(b)) { var h = b.toLowerCase(); return '<h3 class="h3" style="font-size:26px;margin:28px 0 12px">' + tx(h[0].toUpperCase() + h.slice(1)) + "</h3>"; }
+    return typeof b === "string" ? "<p>" + tx(b) + "</p>" : '<ul style="margin:0 0 16px 20px;list-style:disc">' + b.map(function (li) { return "<li>" + tx(li) + "</li>"; }).join("") + "</ul>";
   }
+  pages.ideas = function () {
+    var c = param("c"), room = param("room"), shown = 16;
+    var chips = [{ k: "", name: "Все" }].concat(CATS.map(function (x) { return { k: "c=" + x.id, name: x.name }; }), ROOMS.map(function (r) { return { k: "room=" + r.id, name: r.name }; }), [{ k: "kind=event", name: "События" }]);
+    var cur = c ? "c=" + c : room ? "room=" + room : param("kind") ? "kind=" + param("kind") : "";
+    function list() {
+      return POSTS_.filter(function (q) {
+        if (!cur) return true;
+        var kv = cur.split("=");
+        return kv[0] === "c" ? q.tags.indexOf(kv[1]) >= 0 : kv[0] === "room" ? q.rooms.indexOf(kv[1]) >= 0 : q.kind === kv[1];
+      });
+    }
+    function draw() {
+      var arr = list();
+      fill("#chips", chips.map(function (ch) { return '<button class="chip' + (ch.k === cur ? " on" : "") + '" data-k="' + ch.k + '">' + ch.name + "</button>"; }).join(""));
+      fill("#count", arr.length + " " + plural(arr.length, "запись", "записи", "записей"));
+      fill("#arts", arr.slice(0, shown).map(art).join(""));
+      fill("#more", arr.length > shown ? '<button class="btn btn-line">Показать ещё</button>' : "");
+    }
+    document.addEventListener("click", function (e) {
+      var ch = e.target.closest("[data-k]"); if (ch) { cur = ch.getAttribute("data-k"); shown = 16; history.replaceState(null, "", cur ? "?" + cur : "ideas.html"); draw(); }
+      if (e.target.closest("#more button")) { shown += 16; draw(); }
+    });
+    draw();
+  };
+  pages.idea = function () {
+    var q = post(param("id")) || POSTS_[0]; if (!q) return;
+    var pr = byId(PROJECTS, q.id);
+    document.title = q.t + " — МАРТдекор";
+    var tag = q.kind === "project" ? "Проект" : q.kind === "event" ? "Событие" : (TAGNAME[q.tags[0]] || "Идеи");
+    fill("#crumb", tx(q.t.length > 50 ? q.t.slice(0, 48) + "…" : q.t));
+    fill("#head", '<span class="eyebrow">' + tag + "</span><h1>" + tx(q.t) + '</h1><div class="meta"><span>' + date(q.d) + "</span>" + (q.ph.length ? "<span>" + q.ph.length + " фото</span>" : "") + (q.v ? "<span>есть видео</span>" : "") + "</div>");
+    if (q.ph.length) fill("#cover", '<div data-gal="' + q.ph.join(",") + '"><button data-zoom="0" style="display:block;width:100%">' + pic(q.ph[0], q.t, false, true) + "</button></div>");
+    fill("#body", q.x.map(block).join("") + (q.v ? '<p><a class="link-more" href="https://vk.ru/wall-53471837_' + q.id + '" target="_blank" rel="noopener">Смотреть видео во&nbsp;ВКонтакте ' + ARROW + "</a></p>" : ""));
+    if (q.ph.length > 1) fill("#minigal", gal(q.ph, "minigal"));
+    fill("#src", '<a href="https://vk.ru/wall-53471837_' + q.id + '" target="_blank" rel="noopener">Обсудить во&nbsp;ВКонтакте</a>');
+    fill("#cta", pr ? '<b>Хотите так&nbsp;же?</b><div class="btns"><a class="btn btn-main" href="project.html?id=' + pr.id + '">Смотреть проект' + ARROW + "</a></div>"
+      : '<b>Подберём под&nbsp;ваш интерьер</b><div class="btns"><button class="btn btn-main" data-book="salon">Записаться на&nbsp;подбор' + ARROW + '</button><button class="btn btn-line" data-pick="c:' + q.id + '" data-label><i class="ti ti-heart"></i>В подборку</button></div>');
+    var more = POSTS_.filter(function (x) { return x.id !== q.id && x.ph.length && q.tags[0] && x.tags[0] === q.tags[0]; }).slice(0, 3);
+    if (more.length) fill("#more-arts", more.map(art).join("")); else { var m = $("#more-box"); if (m) m.hidden = true; }
+  };
 
-  /* ── статья ── */
-  function article() {
-    var a = ARTICLES.filter(function (x) { return x.id === params.get("id"); })[0] || ARTICLES[0];
-    document.title = a.title + " — МАРТдекор";
-    var tones = { traversee: "ink", classic: "stone", nature: "sage" };
-    var body = a.body.map(function (b) {
-      if (b[0] === "h") return "<h2>" + esc(b[1]) + "</h2>";
-      if (b[0] === "li") return "<ul>" + b[1].map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
-      return "<p>" + esc(b[1]) + "</p>";
-    }).join("");
-    fill($("#article"), '<div class="crumbs"><a href="index.html">Главная</a> / <a href="index.html#sovety">Советы</a></div>' +
-      '<span class="eyebrow">' + a.tag + "</span><h1>" + esc(a.title) + '</h1><p class="lead">' + esc(a.lead) + "</p>" +
-      '<div class="ph t-' + tones[a.id] + '"><span class="ph-cap"><i class="ti ti-photo"></i>Фото из поста салона</span></div>' + body +
-      '<p class="source">Текст салона: <a href="' + a.src + '" target="_blank" rel="noopener">' + esc(a.srcLabel) + "</a></p>" +
-      '<div class="promise" style="margin-top:30px"><p>Покажем эти материалы вживую и подберём сочетания под вашу комнату.</p>' +
-      '<a class="btn btn-light" href="catalog.html"><i class="ti ti-layout-grid"></i>В каталог</a></div>');
+  /* мягкое появление */
+  function reveal() {
+    var els = $$(".panel, .duo, .foot"); els.forEach(function (e) { e.classList.add("rv"); });
+    if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("in"); }); return; }
+    var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }); }, { rootMargin: "0px 0px -6% 0px" });
+    els.forEach(function (e) { io.observe(e); });
   }
 
   chrome();
-  if (page === "home") home();
-  if (page === "catalog") catalog();
-  if (page === "item") product();
-  if (page === "article") article();
-  bindWa(document);
-  openNow();
+  if (pages[PAGE]) pages[PAGE]();
   syncPick();
-  glueTails(document);
   reveal();
+  if (location.hash && /^#\w+$/.test(location.hash)) setTimeout(function () { var t = $(location.hash); if (t) t.scrollIntoView(); }, 60);
 })();

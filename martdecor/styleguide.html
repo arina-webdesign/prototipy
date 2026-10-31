@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стайлборд — МАРТдекор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/style.css?v=13">
+<style>
+  .sg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: var(--gap); }
+  .sg h2 { font-size: 34px; margin-bottom: 26px; }
+  .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; }
+  .sw div { font-size: 12.5px; line-height: 1.35; }
+  .sw i { display: block; height: 78px; border-radius: 14px; margin-bottom: 10px; border: 1px solid rgba(35, 31, 29, .08); }
+  .sw b { display: block; font: 600 13px/1.3 var(--sans); letter-spacing: .02em; }
+  .type div { display: flex; gap: 26px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .type span.k { flex: none; width: 150px; font-size: 12.5px; color: var(--muted); }
+  .row-ui { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 18px; }
+  .btn-main.hov { background: var(--wine-d); } .btn-line.hov { background: var(--wine); color: #fff; }
+  .el { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: end; }
+  .el figure { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .el figure > *:first-child { margin-bottom: 12px; }
+  .arch-demo { width: 110px; height: 60px; border: 1.5px solid var(--taupe); border-bottom: 0; border-radius: 60px 60px 0 0; }
+  .card-demo { width: 120px; height: 70px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); }
+  .badge { display: inline-flex; gap: 14px; align-items: center; background: var(--bg); border-radius: 14px; padding: 14px 20px; }
+  .badge b { font: 400 44px/1 var(--serif); }
+  @media (max-width: 980px) { .sg { grid-template-columns: 1fr; } .el { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body data-page="styleguide">
+<header class="top"></header>
+<main class="wrap">
+  <section class="panel">
+    <span class="eyebrow">Визуальная система</span>
+    <h1 class="h2" style="font-size:clamp(36px,3.6vw,52px)">Стайлборд «Галерея фактур»</h1>
+    <p class="lead" style="max-width:640px;margin-top:14px">Тёплый молочный фон, бордо для&nbsp;главного действия, Tenor Sans в&nbsp;заголовках, мягкие скругления, арка и&nbsp;двойная линия как&nbsp;мотивы. Всё, что&nbsp;нужно верстальщику, на&nbsp;одной странице.</p>
+  </section>
+
+  <div class="sg">
+    <section class="panel" style="margin-top:0">
+      <h2>Логотип</h2>
+      <div style="display:flex;gap:40px;align-items:center;flex-wrap:wrap">
+        <a class="logo" href="index.html" style="transform:scale(1.5);transform-origin:left center"><span class="logo-word"><svg class="logo-arch" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M1 40 A49 39 0 0 1 99 40"/></svg>МАРТ<span>декор</span></span><span class="logo-sub">Интерьерный салон</span></a>
+      </div>
+      <p class="small muted" style="margin-top:40px">Вариант для&nbsp;сайта: слово, набранное Tenor Sans, и&nbsp;тонкая арка над&nbsp;«МАРТ», как&nbsp;на&nbsp;мудборде. У&nbsp;салона есть фирменный логотип-арка с&nbsp;колоннами: для&nbsp;финала нужен его векторный файл.</p>
+    </section>
+    <section class="panel" style="margin-top:0">
+      <h2>Цветовая палитра</h2>
+      <div class="sw">
+        <div><i style="background:#F4EFE7"></i><b>#F4EFE7</b>Известняк, фон</div>
+        <div><i style="background:#FBF8F3"></i><b>#FBF8F3</b>Фон карточек</div>
+        <div><i style="background:#E6DCCD"></i><b>#E6DCCD</b>Тёплый камень</div>
+        <div><i style="background:#231F1D"></i><b>#231F1D</b>Графит, текст</div>
+        <div><i style="background:#6A615C"></i><b>#6A615C</b>Текст вторичный</div>
+        <div><i style="background:#D9CFC2"></i><b>#D9CFC2</b>Линии</div>
+        <div><i style="background:#6B1E2B"></i><b>#6B1E2B</b>Бордо, кнопки</div>
+        <div><i style="background:#7D9682"></i><b>#7D9682</b>Шалфей</div>
+        <div><i style="background:#A6977B"></i><b>#A6977B</b>Тауп</div>
+        <div><i style="background:#3F4132"></i><b>#3F4132</b>Олива, подвал</div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Типографика</h2>
+    <div class="type">
+      <div><span class="k">H1 · Tenor Sans 400 · 60 px (тел. 34)</span><span class="h1">Подбор не&nbsp;по&nbsp;каталогу, а&nbsp;<em>под&nbsp;ваш интерьер</em></span></div>
+      <div><span class="k">H2 · 42 px (тел. 29)</span><span class="h2">Всё для&nbsp;стен в&nbsp;одном салоне</span></div>
+      <div><span class="k">H3 · 28 px</span><span class="h3">Почему выбирают МАРТдекор</span></div>
+      <div><span class="k">Цифры · 50 px</span><span style="font:400 50px/1 var(--serif)">3&nbsp;000+</span></div>
+      <div><span class="k">Надзаголовок · Manrope 700 · 11 px, разрядка</span><span class="eyebrow" style="margin:0">Наши материалы</span></div>
+      <div><span class="k">Лид · Manrope 400 · 17 px</span><span class="lead">Лепной декор, панели, краски, обои и&nbsp;другие отделочные материалы&nbsp;— в&nbsp;одном салоне.</span></div>
+      <div><span class="k">Текст · 16 px · подписи 13 px</span><span>Основной текст, меню и&nbsp;кнопки&nbsp;— Manrope 400–700. <span class="small muted">Подпись к&nbsp;фото или&nbsp;цене.</span></span></div>
+    </div>
+  </section>
+
+  <div class="sg">
+    <section class="panel" style="margin-top:0">
+      <h2>Кнопки</h2>
+      <div class="row-ui"><button class="btn btn-main">Записаться на&nbsp;подбор<span class="arrow"></span></button><button class="btn btn-main hov">При&nbsp;наведении<span class="arrow"></span></button></div>
+      <div class="row-ui"><button class="btn btn-line"><i class="ti ti-photo"></i>Прислать фото комнаты</button><button class="btn btn-line hov"><i class="ti ti-photo"></i>При&nbsp;наведении</button></div>
+      <div class="row-ui"><button class="btn btn-main btn-sm">Маленькая</button><button class="btn btn-line btn-xs"><i class="ti ti-heart"></i>В подборку</button><a class="link-more" href="catalog.html">Смотреть все материалы<span class="arrow"></span></a></div>
+      <div class="row-ui"><span class="chip on">Все</span><span class="chip">Карнизы</span><span class="chip">Молдинги</span></div>
+      <p class="small muted">Кнопки-таблетки, полностью скруглённые. Одна главная кнопка на&nbsp;экран.</p>
+    </section>
+    <section class="panel" style="margin-top:0">
+      <h2>Элементы</h2>
+      <div class="el">
+        <figure><div class="arch-demo"></div>Арка&nbsp;— рамка и&nbsp;акцент</figure>
+        <figure><span class="step-n">2</span>Арка с&nbsp;номером шага</figure>
+        <figure><div class="molding" style="margin:0 0 12px;width:110px"></div>Двойная линия&nbsp;— как&nbsp;молдинг</figure>
+        <figure><div class="card-demo"></div>Скругление карточек 14&nbsp;px</figure>
+      </div>
+      <div class="row-ui" style="margin-top:30px"><span class="badge"><b>5,0</b><span><span class="stars" style="color:var(--wine)">★★★★★</span><br><span class="small muted">38 оценок на&nbsp;Яндекс Картах</span></span></span></div>
+    </section>
+  </div>
+
+  <div class="sg">
+    <section class="panel" style="margin-top:0">
+      <h2>Карточка подбора</h2>
+      <div class="formats" style="grid-template-columns:repeat(2,1fr);max-width:420px">
+        <span class="format"><i class="ti ti-armchair"></i><b>Подбор в&nbsp;салоне</b><p>Приходите&nbsp;— покажем образцы рядом и&nbsp;соберём сочетания.</p><span class="go">Записаться<span class="arrow"></span></span></span>
+        <span class="format"><i class="ti ti-photo"></i><b>По&nbsp;фото комнаты</b><p>Пришлите фото, проект или&nbsp;картинку из&nbsp;интернета.</p><span class="go">Прислать фото<span class="arrow"></span></span></span>
+      </div>
+    </section>
+    <section class="panel" style="margin-top:0">
+      <h2>Карточка товара</h2>
+      <div class="goods" id="sg-good" style="grid-template-columns:repeat(2,1fr);max-width:520px"></div>
+    </section>
+  </div>
+</main>
+<div class="wrap"><footer class="foot"></footer></div>
+<script src="js/typo.js?v=13"></script>
+<script src="js/data.js?v=13"></script>
+<script src="js/products.js?v=13"></script>
+<script src="js/posts.js?v=13"></script>
+<script src="js/main.js?v=13"></script>
+</body>
+</html>
