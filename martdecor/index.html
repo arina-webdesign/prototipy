@@ -15,25 +15,26 @@
 <header class="top" id="top"></header>
 
 <main>
-  <!-- первый экран: обещание салона его же словами -->
+  <!-- первый экран: главный продукт салона — подбор, главное действие — запись -->
   <section class="hero">
     <div class="wrap hero-in">
       <div>
         <span class="eyebrow">Интерьерный салон · Ростов-на-Дону · с&nbsp;2018 года</span>
-        <h1>Место, где&nbsp;красота становится <em>частью вашего интерьера</em></h1>
-        <p class="lead">Обои, фрески, стеновые панели, каменный шпон, краски и&nbsp;лепной декор&nbsp;— более 90 брендов в&nbsp;одном салоне. Приходите с&nbsp;фото комнаты или&nbsp;дизайн-проектом: подберём материалы и&nbsp;рассчитаем количество.</p>
+        <h1>Подберём материалы для&nbsp;стен <em>под&nbsp;ваш интерьер</em></h1>
+        <p class="lead">Обои, фрески, стеновые панели, каменный шпон, краски и&nbsp;лепной декор&nbsp;— более 90 брендов и&nbsp;образцы вживую в&nbsp;одном салоне. Приходите с&nbsp;дизайн-проектом, чертежом или&nbsp;просто картинкой из&nbsp;интернета.</p>
         <div class="hero-btns">
-          <a class="btn btn-filled" href="catalog.html"><i class="ti ti-layout-grid"></i>Смотреть каталог</a>
-          <a class="btn btn-ghost" href="#kontakty"><i class="ti ti-map-pin"></i>Как&nbsp;добраться</a>
+          <button class="btn btn-filled" data-book="salon"><i class="ti ti-calendar-event"></i>Записаться на&nbsp;подбор</button>
+          <a class="btn btn-ghost" data-wa="foto" href="#"><i class="ti ti-brand-whatsapp"></i>Прислать фото комнаты</a>
         </div>
+        <a class="hero-link" href="catalog.html">или&nbsp;посмотреть каталог: шесть разделов, цены «от» <i class="ti ti-arrow-right"></i></a>
         <div class="hero-facts">
           <div><b data-open><span class="t">Ростов-на-Дону</span></b><span>Пн–пт 10:00–19:00, сб–вс 10:00–17:00</span></div>
           <div><b>Пр. Михаила Нагибина, 30Л</b><span>Дизайн-центр WEST, цокольный этаж. Есть парковка</span></div>
-          <div><b>Как&nbsp;купить</b><span>Подбор с&nbsp;менеджером, счёт, доставка Яндекс Go или&nbsp;ТК</span></div>
+          <div><b>Как&nbsp;купить</b><span>Подбор с&nbsp;менеджером, счёт, доставка по&nbsp;Ростову и&nbsp;в&nbsp;другие города</span></div>
         </div>
       </div>
       <div class="hero-art">
-        <div class="ph a1 t-stone"><span class="ph-cap"><i class="ti ti-photo"></i>Фото: зал салона с&nbsp;образцами</span></div>
+        <div class="ph a1 t-stone"><span class="ph-cap"><i class="ti ti-photo"></i>Фото: светлый зал с&nbsp;лепниной и&nbsp;образцами</span></div>
         <div class="ph a2 t-sage"></div>
         <div class="hero-badge">
           <span class="r">5,0</span>
@@ -45,26 +46,49 @@
 
   <hr class="molding">
 
-  <!-- разделы — шесть групп товаров из описания Телеграма салона -->
-  <section class="block" id="razdely">
-    <div class="wrap">
-      <div class="block-head">
-        <div><span class="eyebrow">Каталог</span><h2>Всё для&nbsp;стен в&nbsp;одном месте</h2></div>
-        <p class="lead">Не&nbsp;нужно искать подходящие элементы в&nbsp;разных магазинах и&nbsp;самому сводить их&nbsp;в&nbsp;одну композицию.</p>
-      </div>
-      <div class="secs" id="secs"></div>
-      <!-- остальное — из описания группы ВК -->
-      <div class="also"><b>А&nbsp;ещё&nbsp;в&nbsp;салоне</b><span>стеклянные панели с&nbsp;печатью любого изображения</span><span>фотопечать на&nbsp;плитке и&nbsp;мозаика</span><span>эко-панели из&nbsp;натуральных трав и&nbsp;цветов</span><span>декоративные балки</span><span>скрытое освещение и&nbsp;теневые профили</span><span>барельефы из&nbsp;гипса</span></div>
-    </div>
-  </section>
-
-  <!-- как подбираем: путь, по которому салон уже работает -->
+  <!-- как подбираем: три формата, которые у салона уже есть -->
   <section class="block alt" id="podbor">
     <div class="wrap">
       <div class="block-head">
         <div><span class="eyebrow">Как&nbsp;подбираем</span><h2>Подбор не&nbsp;по&nbsp;каталогу, а&nbsp;под&nbsp;ваш&nbsp;интерьер</h2></div>
-        <p class="lead">Учитываем размеры комнаты, освещение, мебель и&nbsp;оттенок пола. В&nbsp;итоге&nbsp;— не&nbsp;случайный набор товаров, а&nbsp;продуманное решение.</p>
+        <p class="lead">Учитываем размеры комнаты, освещение, мебель и&nbsp;оттенок пола. Выберите, как&nbsp;удобнее: в&nbsp;салоне, у&nbsp;вас на&nbsp;объекте или&nbsp;на&nbsp;расстоянии.</p>
       </div>
+      <div class="ways">
+        <article class="way">
+          <div class="ph t-stone"><span class="ph-cap"><i class="ti ti-photo"></i>Фото: образцы в&nbsp;зале</span></div>
+          <span class="way-n">В&nbsp;салоне</span>
+          <h3>Сравнить образцы рядом</h3>
+          <p>Рельеф, блеск и&nbsp;настоящий оттенок видно только вживую. Можно прийти без&nbsp;записи, на&nbsp;подбор по&nbsp;проекту лучше записаться&nbsp;— специалист подготовится.</p>
+          <ul class="way-meta">
+            <li><i class="ti ti-map-pin"></i>Пр. Нагибина, 30Л, ДЦ WEST, цокольный этаж</li>
+            <li><i class="ti ti-clock"></i>Пн–пт 10–19, сб–вс 10–17</li>
+          </ul>
+          <button class="btn btn-filled btn-sm" data-book="salon">Записаться в&nbsp;салон</button>
+        </article>
+        <article class="way">
+          <div class="ph t-sage"><span class="ph-cap"><i class="ti ti-photo"></i>Фото: примерка лепнины на&nbsp;стене</span></div>
+          <span class="way-n">На&nbsp;объекте</span>
+          <h3>Примерить прямо на&nbsp;стене</h3>
+          <p>Привезём образцы лепного декора и&nbsp;3D-панелей Orac: видно масштаб и&nbsp;игру света на&nbsp;рельефе при&nbsp;вашем освещении.</p>
+          <ul class="way-meta">
+            <li><i class="ti ti-car"></i>Выезд с&nbsp;образцами&nbsp;— по&nbsp;договорённости</li>
+          </ul>
+          <button class="btn btn-ghost btn-sm" data-book="obekt">Заказать выезд</button>
+        </article>
+        <article class="way">
+          <div class="ph t-sand"><span class="ph-cap"><i class="ti ti-photo"></i>Фото: проект на&nbsp;экране телефона</span></div>
+          <span class="way-n">На&nbsp;расстоянии</span>
+          <h3>Прислать фото или&nbsp;проект</h3>
+          <p>Дизайн-проект, чертёж, коллаж или&nbsp;картинка из&nbsp;интернета&nbsp;— подберём, посчитаем и&nbsp;пришлём варианты. Оплата по&nbsp;QR или&nbsp;реквизитам, доставка по&nbsp;Ростову и&nbsp;в&nbsp;другие города.</p>
+          <ul class="way-meta">
+            <li><i class="ti ti-message-circle"></i>WhatsApp, Telegram, MAX</li>
+          </ul>
+          <a class="btn btn-ghost btn-sm" data-wa="foto" href="#">Прислать фото</a>
+        </article>
+      </div>
+      <div class="need" style="margin-top:22px"><i class="ti ti-help-circle"></i><span><b>Нужно от&nbsp;вас:</b> подбор и&nbsp;выезд с&nbsp;образцами бесплатные? Выезжаете только по&nbsp;Ростову или&nbsp;и&nbsp;в&nbsp;область? Напишем это прямо в&nbsp;карточках&nbsp;— так&nbsp;больше людей решится записаться.</span></div>
+
+      <h3 class="sub-h">Как&nbsp;проходит подбор</h3>
       <div class="steps">
         <div class="step"><div class="num">1</div><h3>Приходите с&nbsp;идеей</h3><p>Дизайн-проект, чертежи, коллажи или&nbsp;просто понравившийся интерьер на&nbsp;телефоне.</p></div>
         <div class="step"><div class="num">2</div><h3>Смотрите вживую</h3><p>На&nbsp;фото сложно оценить рельеф, блеск и&nbsp;настоящий оттенок. В&nbsp;салоне образцы сравнивают рядом, а&nbsp;можно заказать выезд с&nbsp;образцами на&nbsp;объект.</p></div>
@@ -74,8 +98,53 @@
       <div class="promise">
         <span class="big">6 часов</span>
         <p>Подбор всех материалов для&nbsp;стен займёт не&nbsp;более 6 часов. Для&nbsp;подбора по&nbsp;проекту лучше договориться о&nbsp;встрече заранее&nbsp;— специалист подготовится.</p>
-        <a class="btn btn-light" href="tel:+79094200420"><i class="ti ti-calendar-event"></i>Записаться на&nbsp;подбор</a>
+        <button class="btn btn-light" data-book="salon"><i class="ti ti-calendar-event"></i>Записаться на&nbsp;подбор</button>
       </div>
+    </div>
+  </section>
+
+  <!-- команда: имена и слова менеджеров — с martdecor.ru -->
+  <section class="block" id="komanda">
+    <div class="wrap">
+      <div class="block-head">
+        <div><span class="eyebrow">Команда</span><h2>Кто будет подбирать</h2></div>
+        <p class="lead">Подбор, расчёт и&nbsp;сопровождение заказа&nbsp;— от&nbsp;первой встречи до&nbsp;доставки на&nbsp;объект.</p>
+      </div>
+      <div class="team">
+        <figure class="founder">
+          <blockquote>«Цель открытия интерьерного салона&nbsp;— помогать нашим клиентам воплощать интерьерные идеи. Я,&nbsp;как&nbsp;основатель салона, 24/7 стараюсь сделать интерьерный мир лучше, ярче, комфортнее»</blockquote>
+          <figcaption><b>Мила</b><span>основатель салона</span></figcaption>
+        </figure>
+        <figure class="person">
+          <div class="ph t-stone"><span class="ph-cap"><i class="ti ti-user"></i>Фото: Дарья</span></div>
+          <b>Дарья</b><span class="role">менеджер-комплектатор</span>
+          <p>«Люблю все материалы из&nbsp;нашего ассортимента, могу представить любой продукт в&nbsp;вашем интерьере и&nbsp;знаю точно, что&nbsp;это будет красиво и&nbsp;уютно.»</p>
+        </figure>
+        <figure class="person">
+          <div class="ph t-sage"><span class="ph-cap"><i class="ti ti-user"></i>Фото: Артем</span></div>
+          <b>Артем</b><span class="role">менеджер-комплектатор</span>
+          <p>«Мне интересно работать с&nbsp;материалами и&nbsp;деталями, которые формируют характер пространства…»</p>
+        </figure>
+        <figure class="person">
+          <div class="ph t-sand"><span class="ph-cap"><i class="ti ti-user"></i>Фото: Екатерина</span></div>
+          <b>Екатерина</b><span class="role">менеджер-дизайнер</span>
+          <p>«Помогу разобраться в&nbsp;многообразии материалов, подобрать подходящие сочетания и&nbsp;найти решение именно для&nbsp;вашего пространства.»</p>
+        </figure>
+      </div>
+      <div class="need" style="margin-top:26px"><i class="ti ti-camera"></i><span><b>Нужно от&nbsp;вас:</b> фото команды и&nbsp;актуальный состав. В&nbsp;отзывах покупатели называют консультантов по&nbsp;именам, упоминают и&nbsp;Владимира&nbsp;— показываем его тоже?</span></div>
+    </div>
+  </section>
+
+  <!-- разделы — шесть групп товаров из описания Телеграма салона -->
+  <section class="block alt" id="razdely">
+    <div class="wrap">
+      <div class="block-head">
+        <div><span class="eyebrow">Каталог</span><h2>Всё для&nbsp;стен в&nbsp;одном месте</h2></div>
+        <p class="lead">Не&nbsp;нужно искать подходящие элементы в&nbsp;разных магазинах и&nbsp;самому сводить их&nbsp;в&nbsp;одну композицию.</p>
+      </div>
+      <div class="secs" id="secs"></div>
+      <!-- остальное — из описания группы ВК -->
+      <div class="also"><b>А&nbsp;ещё&nbsp;в&nbsp;салоне</b><span>стеклянные панели с&nbsp;печатью любого изображения</span><span>фотопечать на&nbsp;плитке и&nbsp;мозаика</span><span>эко-панели из&nbsp;натуральных трав и&nbsp;цветов</span><span>декоративные балки</span><span>скрытое освещение и&nbsp;теневые профили</span><span>барельефы из&nbsp;гипса</span></div>
     </div>
   </section>
 
@@ -91,20 +160,41 @@
     </div>
   </section>
 
-  <!-- почему у МАРТдекор — только подтверждённое -->
+  <!-- почему МАРТдекор: преимущества как ответы на частые страхи покупателей -->
   <section class="block alt" id="pochemu">
     <div class="wrap">
       <div class="block-head">
-        <div><span class="eyebrow">Почему МАРТдекор</span><h2>Салон, в&nbsp;котором удобно выбирать</h2></div>
+        <div><span class="eyebrow">Почему МАРТдекор</span><h2>Чтобы ремонт обошёлся без&nbsp;сюрпризов</h2></div>
+        <div class="nums">
+          <div><b>90+</b><span>брендов, официальный партнёр Orac Decor</span></div>
+          <div><b>3&nbsp;000+</b><span>проектов в&nbsp;комплектации</span></div>
+          <div><b>с&nbsp;2018</b><span>в&nbsp;Ростове-на-Дону</span></div>
+        </div>
       </div>
-      <div class="why">
-        <div><div class="k">90+</div><h3>брендов</h3><p>Официальный дилер, цены от&nbsp;производителя. Официальный партнёр Orac Decor.</p></div>
-        <div><div class="k">3&nbsp;000+</div><h3>проектов в&nbsp;комплектации</h3><p>От&nbsp;квартир и&nbsp;загородных домов до&nbsp;ресторанов и&nbsp;офисов.</p></div>
-        <div><div class="k">с&nbsp;2018</div><h3>в&nbsp;Ростове-на-Дону</h3><p>С&nbsp;самого начала&nbsp;— не&nbsp;просто магазин, а&nbsp;место, где&nbsp;фактуры можно увидеть и&nbsp;почувствовать вживую.</p></div>
-        <div><div class="k">Цвет</div><h3>Колеровка в&nbsp;салоне</h3><p>Оттенок краски или&nbsp;штукатурки&nbsp;— по&nbsp;каталогу, образцу или&nbsp;референсу.</p></div>
-        <div><div class="k">Образцы</div><h3>Выезд с&nbsp;образцами на&nbsp;объект</h3><p>Лепной декор и&nbsp;3D-панели Orac&nbsp;— на&nbsp;примерку прямо на&nbsp;стену: видно масштаб и&nbsp;игру света на&nbsp;рельефе.</p></div>
-        <div><div class="k">Склад</div><h3>Хранение оплаченных заказов</h3><p>Материалы подождут на&nbsp;складе, пока объект не&nbsp;будет готов к&nbsp;следующему этапу.</p></div>
+      <div class="calm">
+        <div><span class="q">Не&nbsp;сочетается?</span><h3>Подбираем всё для&nbsp;стен вместе</h3><p>Обои, краску, панели и&nbsp;лепнину&nbsp;— под&nbsp;мебель, пол и&nbsp;свет вашей комнаты, а&nbsp;не&nbsp;по&nbsp;отдельности в&nbsp;разных магазинах.</p></div>
+        <div><span class="q">Не&nbsp;хватит или&nbsp;останется лишнее?</span><h3>Считаем количество</h3><p>С&nbsp;учётом размеров помещения, раппорта, подрезки и&nbsp;запаса.</p></div>
+        <div class="dark"><span class="q">Цвет окажется другим?</span><h3>Колеруем в&nbsp;салоне</h3><p>Оттенок краски или&nbsp;штукатурки&nbsp;— по&nbsp;каталогу, образцу или&nbsp;референсу. Лепнину и&nbsp;3D-панели можно примерить на&nbsp;объекте.</p></div>
+        <div><span class="q">Привезут не&nbsp;то?</span><h3>Сначала согласуем, потом счёт</h3><p>Менеджер уточнит наличие и&nbsp;согласует с&nbsp;вами состав заказа, стоимость и&nbsp;доставку&nbsp;— и&nbsp;только после этого выставит счёт.</p></div>
+        <div><span class="q">Объект ещё не&nbsp;готов?</span><h3>Храним оплаченный заказ</h3><p>Материалы подождут на&nbsp;складе, пока объект не&nbsp;будет готов к&nbsp;следующему этапу.</p></div>
+        <div><span class="q">Не&nbsp;подошло?</span><h3>Возврат 30 дней</h3><p>Если на&nbsp;товаре нет повреждений и&nbsp;деформации.</p></div>
       </div>
+      <div class="need" style="margin-top:26px"><i class="ti ti-help-circle"></i><span><b>Нужно от&nbsp;вас:</b> можно ли&nbsp;докупить материал из&nbsp;той&nbsp;же партии и&nbsp;делаете&nbsp;ли пробный выкрас перед колеровкой? Это частые опасения покупателей&nbsp;— если да, допишем.</span></div>
+    </div>
+  </section>
+
+  <!-- истории подбора и отзывы — дословно с Яндекс Карт -->
+  <section class="block" id="otzyvy">
+    <div class="wrap">
+      <div class="block-head">
+        <div><span class="eyebrow">Отзывы</span><h2>Что&nbsp;пишут покупатели и&nbsp;дизайнеры</h2></div>
+        <div class="rate"><span class="r">5,0</span><span><span class="stars">★★★★★</span><br><span class="small muted">38 оценок, 32 отзыва<br>на&nbsp;Яндекс Картах</span></span></div>
+      </div>
+      <h3 class="sub-h" style="margin-top:0">Истории подбора</h3>
+      <div class="stories" id="stories"></div>
+      <div class="need" style="margin:22px 0 48px"><i class="ti ti-camera"></i><span><b>Нужно от&nbsp;вас:</b> фото этих работ и&nbsp;список материалов&nbsp;— покажем, что&nbsp;и&nbsp;сколько вошло в&nbsp;каждый проект.</span></div>
+      <div class="revs" id="revs"></div>
+      <p class="more-revs"><a href="https://yandex.ru/maps/org/martdekor/192527386082/reviews/" target="_blank" rel="noopener">Все отзывы на&nbsp;Яндекс Картах <i class="ti ti-external-link"></i></a></p>
     </div>
   </section>
 
@@ -128,21 +218,9 @@
       <div class="events">
         <h3>Встречи в&nbsp;салоне</h3>
         <div class="ev"><div class="d"><b>ср</b><span>14:00</span></div><div><p>Ланч для&nbsp;дизайнеров каждую среду: гибкие стеновые панели, бамбуковые панели, декоративная штукатурка, обои с&nbsp;дофамином</p><p class="s">Запись по&nbsp;телефону +7&nbsp;(909)&nbsp;421‑0‑421</p></div></div>
-        <div class="ev"><div class="d"><b>20</b><span>мая</span></div><div><p>Прошёл семинар Сергея Трегубова «Цвет под&nbsp;контролем» для&nbsp;дизайнеров интерьера</p><p class="s">2026 год</p></div></div>
-        <div class="ev"><div class="d"><b>14</b><span>авг</span></div><div><p>Прошёл семинар с&nbsp;салоном штор RADIX и&nbsp;компанией «Тихие стены»: как&nbsp;сочетать панели, фрески и&nbsp;металл</p><p class="s">2025 год</p></div></div>
+        <div class="ev"><div class="d"><b><i class="ti ti-presentation"></i></b><span>семинары</span></div><div><p>Семинары с&nbsp;приглашёнными экспертами: цвет, монтаж панелей и&nbsp;лепнины, новинки брендов</p><p class="s">Последний&nbsp;— «Цвет под&nbsp;контролем» Сергея Трегубова, 20&nbsp;мая 2026</p></div></div>
         <div class="ev"><div class="d"><b><i class="ti ti-award"></i></b><span>WOW</span></div><div><p>Проект Виктории Смоленцевой салон выдвинул на&nbsp;конкурс Orac «WOW стена»&nbsp;— 28 финалистов из&nbsp;87</p><p class="s">Диплом финалиста, Москва, 2024 год</p></div></div>
       </div>
-    </div>
-  </section>
-
-  <!-- отзывы — дословно с Яндекс Карт -->
-  <section class="block" id="otzyvy">
-    <div class="wrap">
-      <div class="block-head">
-        <div><span class="eyebrow">Отзывы</span><h2>Что&nbsp;пишут покупатели и&nbsp;дизайнеры</h2></div>
-        <div class="rate"><span class="r">5,0</span><span><span class="stars">★★★★★</span><br><span class="small muted">38 оценок, 32 отзыва<br>на&nbsp;Яндекс Картах</span></span></div>
-      </div>
-      <div class="revs" id="revs"></div>
     </div>
   </section>
 
@@ -173,8 +251,9 @@
           </div>
           <div class="hero-btns">
             <a class="btn btn-filled" href="https://yandex.ru/maps/org/martdekor/192527386082/" target="_blank" rel="noopener"><i class="ti ti-route"></i>Маршрут</a>
-            <a class="btn btn-ghost" href="tel:+79094200420"><i class="ti ti-phone"></i>Позвонить</a>
+            <button class="btn btn-ghost" data-book="salon"><i class="ti ti-calendar-event"></i>Записаться</button>
           </div>
+          <div class="need"><i class="ti ti-door-enter"></i><span><b>Нужно от&nbsp;вас:</b> фото входа и&nbsp;пара слов, как&nbsp;найти салон внутри дизайн-центра,&nbsp;— чтобы покупатель не&nbsp;заблудился.</span></div>
           <div class="need"><i class="ti ti-phone"></i><span><b>Нужно от&nbsp;вас:</b> какой номер главный. В&nbsp;группе ВК, на&nbsp;сайтах и&nbsp;в&nbsp;постах их&nbsp;четыре: 420‑04‑20, 420‑94‑20, 421‑04‑21 и&nbsp;+7&nbsp;905&nbsp;476‑27‑42.</span></div>
         </div>
       </div>

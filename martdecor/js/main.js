@@ -50,15 +50,26 @@
     '<path d="M13 38V23a7 7 0 0 1 7-7v22z" fill="#7d9682"/>' +
     '<rect x="23" y="21" width="2" height="17" fill="#1f1a19"/><rect x="27" y="23" width="2" height="15" fill="#1f1a19"/></svg>';
 
-  /* ── шапка, подвал, панель подборки ── */
+  function waLink(kind, extra) {
+    return "https://wa.me/" + SALON.wa + "?text=" + encodeURIComponent((SALON.waText[kind] || SALON.waText.foto) + (extra || ""));
+  }
+  function bindWa(root) {
+    $$("[data-wa]", root).forEach(function (a) {
+      a.href = waLink(a.getAttribute("data-wa"), a.getAttribute("data-wa-extra"));
+      a.target = "_blank"; a.rel = "noopener";
+    });
+  }
+
+  /* ── шапка, подвал, панели подборки и записи ── */
   function chrome() {
-    var nav = [["catalog.html", "Каталог", "catalog"], ["index.html#podbor", "Как подбираем", ""], ["index.html#pro", "Дизайнерам", ""],
+    var nav = [["catalog.html", "Каталог", "catalog"], ["index.html#podbor", "Как подбираем", ""],
       ["index.html#sovety", "Советы", "article"], ["index.html#kontakty", "Контакты", ""]];
     fill($("#top"), '<div class="wrap top-in">' +
       '<a class="logo" href="index.html">' + LOGO + '<span class="logo-t"><b>МАРТдекор</b><span>интерьерный салон</span></span></a>' +
-      '<nav class="nav">' + nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[2] && n[2] === page ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("") + "</nav>" +
-      '<div class="top-r"><span class="open-chip" data-open><span class="dot"></span><span class="t">Ростов-на-Дону</span></span>' +
-      '<a class="top-phone" href="tel:' + SALON.tel + '">' + SALON.phone + "</a>" +
+      '<nav class="nav">' + nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[2] && n[2] === page ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("") +
+      '<a class="pro-link" href="index.html#pro">Дизайнерам и мастерам</a></nav>' +
+      '<div class="top-r"><a class="top-phone" href="tel:' + SALON.tel + '">' + SALON.phone + "</a>" +
+      '<button class="btn btn-filled btn-sm top-book" data-book="salon">Записаться</button>' +
       '<button class="pick-btn" data-drawer><i class="ti ti-bookmark"></i>Подборка <span class="n" data-count>0</span></button></div></div>');
 
     fill($("#foot"), '<div class="wrap"><div class="foot-in">' +
@@ -71,22 +82,55 @@
       "<span>Прототип подготовила Арина · наличие показано для примера, фото — заглушки</span></div></div>");
 
     var d = document.createElement("div");
-    d.innerHTML = '<div class="shade" data-close></div><aside class="drawer" aria-label="Подборка">' +
+    d.innerHTML = '<div class="shade" data-close></div><aside class="drawer pick" aria-label="Подборка">' +
       '<div class="dr-head"><div><h3>Ваша подборка</h3><p>Менеджер проверит наличие, рассчитает количество и пришлёт счёт. На сайте оплачивать не нужно.</p></div>' +
       '<button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button></div>' +
-      '<div class="dr-body" data-list></div><div class="dr-foot" data-form></div></aside>';
+      '<div class="dr-body" data-list></div><div class="dr-foot" data-form></div></aside>' +
+      '<aside class="drawer book" aria-label="Запись на подбор">' +
+      '<div class="dr-head"><div><h3>Запись на подбор</h3><p>Менеджер свяжется с вами, уточнит задачу и предложит время.</p></div>' +
+      '<button class="x" data-close aria-label="Закрыть"><i class="ti ti-x"></i></button></div>' +
+      '<div class="dr-body" data-book-body></div></aside>';
     document.body.appendChild(d);
     typoTree(d);
 
     document.addEventListener("click", function (e) {
-      var t = e.target.closest("[data-drawer],[data-close],[data-add],[data-del]");
+      var t = e.target.closest("[data-drawer],[data-close],[data-add],[data-del],[data-book]");
       if (!t) return;
       if (t.hasAttribute("data-drawer")) { renderDrawer(); document.body.classList.add("drawer-open"); }
-      if (t.hasAttribute("data-close")) document.body.classList.remove("drawer-open");
+      if (t.hasAttribute("data-close")) document.body.classList.remove("drawer-open", "book-open");
       if (t.hasAttribute("data-add")) { e.preventDefault(); pick.toggle(t.getAttribute("data-add")); }
       if (t.hasAttribute("data-del")) { pick.toggle(t.getAttribute("data-del")); renderDrawer(); }
+      if (t.hasAttribute("data-book")) {
+        e.preventDefault();
+        document.body.classList.remove("drawer-open");
+        renderBook(t.getAttribute("data-book"));
+        document.body.classList.add("book-open");
+      }
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.body.classList.remove("drawer-open"); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.body.classList.remove("drawer-open", "book-open"); });
+  }
+
+  /* ── запись на подбор: формат выбран кнопкой, с которой пришли ── */
+  function renderBook(format) {
+    fill($("[data-book-body]"), '<form data-book-form class="book-form">' +
+      '<label class="field">Как удобнее подобрать<select data-format>' +
+      '<option value="salon">В салоне</option><option value="obekt">На объекте — выезд с образцами</option>' +
+      '<option value="foto">На расстоянии — по фото или проекту</option></select></label>' +
+      '<div class="row2"><label class="field">Имя<input required placeholder="Как к вам обращаться"></label>' +
+      '<label class="field">Телефон<input required type="tel" placeholder="+7"></label></div>' +
+      '<label class="field">Когда удобно<input placeholder="Например, в субботу после 12"></label>' +
+      '<label class="field">Куда ответить<select><option>WhatsApp</option><option>Telegram</option><option>MAX</option><option>Позвонить</option></select></label>' +
+      '<label class="field">Что подбираем<textarea placeholder="Комната, площадь стен, есть ли дизайн-проект"></textarea></label>' +
+      '<button class="btn btn-filled" style="width:100%" type="submit"><i class="ti ti-send"></i>Отправить заявку</button>' +
+      '<p class="small muted">Фото комнаты или проект можно сразу прислать в <a data-wa="foto" href="#">WhatsApp</a>.</p></form>');
+    var sel = $("[data-format]");
+    if (sel && format) sel.value = format;
+    bindWa($("[data-book-body]"));
+    $("[data-book-form]").addEventListener("submit", function (e) {
+      e.preventDefault();
+      fill($("[data-book-body]"), '<div class="ok"><b>Заявка отправлена — это демо</b>В рабочей версии она придёт менеджеру салона, а он свяжется с вами и предложит время.</div>' +
+        '<div class="need"><i class="ti ti-help-circle"></i><span><b>Нужно от вас:</b> куда удобнее получать заявки с сайта — WhatsApp, Telegram, MAX или почта.</span></div>');
+    });
   }
 
   function syncPick() {
@@ -176,13 +220,14 @@
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("rise"); io.unobserve(e.target); } });
     }, { rootMargin: "0px 0px 80px 0px" });
-    $$(".sec-card, .item, .step, .rev, .art, .why > div").forEach(function (el) {
+    $$(".sec-card, .item, .step, .rev, .art, .way, .person, .calm > div, .story").forEach(function (el) {
       if (el.getBoundingClientRect().top > innerHeight) io.observe(el);
     });
   }
 
   /* ── главная ── */
   function home() {
+    typoTree($("main"));
     fill($("#secs"), SECTIONS.map(function (s) {
       var p = minPrice(s.id);
       return '<a class="sec-card" href="catalog.html?sec=' + s.id + '"><div class="ph t-' + s.tone + '"></div><div>' +
@@ -192,6 +237,11 @@
     }).join(""));
     var feat = ["px175", "dp151", "d1132", "dblack", "santorini", "gelios", "struct", "s20065"];
     fill($("#featured"), feat.map(function (id) { return card(item(id)); }).join(""));
+    fill($("#stories"), STORIES.map(function (s) {
+      return '<article class="story"><div class="ph t-' + s.tone + '"><span class="ph-cap"><i class="ti ti-photo"></i>Фото работы</span></div>' +
+        "<h3>" + esc(s.title) + "</h3><p>" + esc(s.text) + "</p><blockquote>«" + esc(s.quote) + "»</blockquote>" +
+        '<div class="who">' + esc(s.who) + ", " + s.date + ", Яндекс Карты</div></article>";
+    }).join(""));
     fill($("#revs"), REVIEWS.map(function (r) {
       return '<figure class="rev" style="margin:0"><blockquote>' + esc(r.text) + '</blockquote><figcaption><div class="who">' + esc(r.name) +
         '</div><div class="when">' + r.date + ", Яндекс Карты</div></figcaption></figure>";
@@ -268,7 +318,9 @@
       '<div><span class="eyebrow">' + esc(it.brand) + " · " + esc(it.group) + "</span><h1>" + esc(it.name) + '</h1><p class="line">' + esc(it.line) + "</p>" +
       '<div class="pd-buy"><span class="price">' + priceHTML(it) + "</span>" + statusHTML(it) + '<span class="small muted">наличие — для примера</span></div>' +
       '<div class="pd-actions"><button class="btn btn-filled" data-add="' + it.id + '" data-label="Добавить в подборку"><i class="ti ti-bookmark"></i>Добавить в подборку</button>' +
-      '<button class="btn btn-ghost" data-drawer><i class="ti ti-ruler-measure"></i>Расчёт и образец</button></div>' + calc +
+      '<button class="btn btn-ghost" data-drawer><i class="ti ti-ruler-measure"></i>Расчёт и образец</button></div>' +
+      '<p class="pd-live"><i class="ti ti-eye"></i>Хотите увидеть вживую? <button class="link" data-book="salon">Запишитесь в салон</button> или ' +
+      '<a data-wa="item" data-wa-extra="' + esc(it.name) + '" href="#">спросите в WhatsApp</a></p>' + calc +
       '<table class="specs">' + it.specs.map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; }).join("") +
       (it.fits ? "<tr><td>Где применяют</td><td>" + esc(it.fits) + "</td></tr>" : "") + "</table>" +
       '<div class="pc"><div class="plus"><h4>Чем хорош</h4><ul>' + it.pros.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>" +
@@ -314,6 +366,7 @@
   if (page === "catalog") catalog();
   if (page === "item") product();
   if (page === "article") article();
+  bindWa(document);
   openNow();
   syncPick();
   glueTails(document);
