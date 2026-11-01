@@ -502,6 +502,7 @@ a.chip:hover, button.chip:hover { border-color: var(--wine); }
 .ph-hero > .txt, .ph-hero .txt { position: relative; z-index: 2; }
 .ph-hero > .txt { max-width: 860px; }
 .ph-hero h1 { margin-bottom: 14px; }
+.ph-hero h2 + .lead { margin-top: 12px; }
 .ph-hero .lead { max-width: 560px; }
 .deco { position: absolute; top: 0; right: 0; z-index: 0; pointer-events: none; }
 .deco img { width: 100%; height: 100%; object-fit: cover; }

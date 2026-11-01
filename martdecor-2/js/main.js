@@ -293,6 +293,7 @@
     fill("#revs", revs(3));
     fill("#arts", (window.HOME_IDEAS || []).map(post).filter(Boolean).map(art).join(""));
     fill("#faq", faq(FAQ));
+    var p = $("#partner"); if (p) p.href = wa("Здравствуйте! Я дизайнер (архитектор, мастер) и хочу сотрудничать с салоном.");
   };
   pages.services = function () { fill("#svc", svcCards(false)); };
   pages.about = function () {

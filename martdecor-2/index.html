@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/style.css?v=25">
+<link rel="stylesheet" href="css/style.css?v=26">
 </head>
 <body data-page="home">
 <header class="top"></header>
@@ -63,22 +63,63 @@
     <div class="goods" id="goods"></div>
   </section>
 
-  <!-- услуги -->
-  <section class="panel" id="uslugi">
-    <div class="head">
-      <div><span class="eyebrow">Наши услуги</span><h2>Больше, чем материалы</h2></div>
-      <a class="link-more" href="services.html">Все услуги<span class="arrow"></span></a>
+  <!-- услуги — как в концепции: фото штукатурки справа, карточки наложены на его низ -->
+  <section class="panel ph-hero svc-page" id="uslugi">
+    <div class="deco"><img src="img/ui/services.jpg" alt="" loading="lazy"></div>
+    <div class="txt">
+      <span class="eyebrow">Наши услуги</span>
+      <h2 style="font-size:clamp(34px,3.6vw,52px)">Больше, чем материалы</h2>
+      <p class="lead">Помогаем на&nbsp;каждом этапе проекта&nbsp;— от&nbsp;первой идеи до&nbsp;доставки.</p>
+      <a class="link-more" href="services.html" style="margin-top:20px">Все услуги<span class="arrow"></span></a>
     </div>
     <div class="svc-grid" id="svc"></div>
   </section>
 
   <!-- проекты -->
-  <section class="panel">
-    <div class="head">
+  <section class="panel ph-hero">
+    <div class="deco leaf"><img src="img/ui/leaf.jpg" alt=""></div>
+    <div class="head" style="position:relative;z-index:2">
       <div><span class="eyebrow">Наши проекты</span><h2>Реальные интерьеры с&nbsp;нашими материалами</h2></div>
       <a class="link-more" href="projects.html">Все проекты<span class="arrow"></span></a>
     </div>
     <div class="proj-row" id="projects"></div>
+  </section>
+
+  <!-- дизайнерам — кнопка врезана в угол фото -->
+  <section class="panel ph-hero">
+    <div class="des">
+      <div class="txt">
+        <span class="eyebrow">Сотрудничество</span>
+        <h2 style="font-size:clamp(34px,3.6vw,52px)">Для дизайнеров</h2>
+        <p class="lead" style="margin-top:12px">Надёжный партнёр для&nbsp;ваших проектов.</p>
+        <ul class="info-list">
+          <li><i class="ti ti-user"></i>Дистанционный подбор по&nbsp;проекту и&nbsp;референсам</li>
+          <li><i class="ti ti-stack-2"></i>Образцы на&nbsp;объект</li>
+          <li><i class="ti ti-file-invoice"></i>Расчёт и&nbsp;КП для&nbsp;клиента</li>
+          <li><i class="ti ti-calendar-event"></i>Ланч для&nbsp;дизайнеров каждую среду в&nbsp;14:00</li>
+        </ul>
+        <a class="link-more" href="designers.html">Подробнее<span class="arrow"></span></a>
+      </div>
+      <div class="des-ph"><img src="img/ui/designers.jpg" alt="" loading="lazy"><div class="notch"><a class="btn btn-main" id="partner" target="_blank" rel="noopener">Стать партнёром<span class="arrow"></span></a></div></div>
+    </div>
+  </section>
+
+  <!-- о салоне — живое фото зала в арке -->
+  <section class="panel ph-hero">
+    <div class="about-hero">
+      <div class="txt">
+        <span class="eyebrow">О&nbsp;салоне</span>
+        <h2 style="font-size:clamp(34px,3.6vw,52px)">МАРТдекор с&nbsp;2018 года</h2>
+        <p class="lead" style="margin-top:12px">Интерьерный салон отделочных материалов для&nbsp;стен в&nbsp;Ростове-на-Дону. Помогаем создавать продуманные и&nbsp;гармоничные интерьеры.</p>
+        <div class="stats">
+          <div><i class="ti ti-diamond"></i><small>Более</small><b>90 брендов</b><span>официальный партнёр Orac Decor</span></div>
+          <div><i class="ti ti-stack-2"></i><b>3&nbsp;000+</b><span>проектов в&nbsp;комплектации</span></div>
+          <div><i class="ti ti-star"></i><b>5,0</b><span>рейтинг на&nbsp;Яндекс Картах (38&nbsp;оценок)</span></div>
+        </div>
+        <a class="btn btn-main" href="about.html">Наша команда<span class="arrow"></span></a>
+      </div>
+      <div class="arch-ph"><img src="img/vk/w7589_01.jpg" alt="Зал салона МАРТдекор в дизайн-центре WEST" loading="lazy"><div class="arch-badge"><svg class="logo-mark" viewBox="0 0 30 34" aria-hidden="true"><path d="M3 33 V15 A12 12 0 0 1 27 15 V33"/></svg><span><b>МАРТдекор</b>зал салона, дизайн-центр WEST</span></div></div>
+    </div>
   </section>
 
   <!-- отзывы -->
@@ -111,10 +152,10 @@
 
 <div class="wrap"><footer class="foot"></footer></div>
 
-<script src="js/typo.js?v=25"></script>
-<script src="js/data.js?v=25"></script>
-<script src="js/products.js?v=25"></script>
-<script src="js/posts.js?v=25"></script>
-<script src="js/main.js?v=25"></script>
+<script src="js/typo.js?v=26"></script>
+<script src="js/data.js?v=26"></script>
+<script src="js/products.js?v=26"></script>
+<script src="js/posts.js?v=26"></script>
+<script src="js/main.js?v=26"></script>
 </body>
 </html>
