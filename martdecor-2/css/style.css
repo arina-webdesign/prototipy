@@ -13,6 +13,8 @@
   --wine-d: #63192A;
   --brown: #3B2F28;     /* тёмный баннер «Колеровка» и подвал */
   --sage: #7D9682;
+  --icon: #6E3A30;     /* коричневые иконки, как в концепции */
+  --cream: #FBF8F4;    /* фон шапок страниц */
   --head: "Oswald", "Arial Narrow", sans-serif;
   --sans: "Manrope", system-ui, sans-serif;
   --r: 26px;            /* скругление карточек 24–28 px */
@@ -491,6 +493,62 @@ a.chip:hover, button.chip:hover { border-color: var(--wine); }
 .rv.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } * { transition: none !important; } }
 
+/* ——— детали по картинкам концепции (01.11.2026) ——— */
+.svc { background: #fff; border: 0; box-shadow: var(--shadow); }
+.svc b { font: 700 21px/1.2 var(--sans); text-transform: none; }
+.svc .ti, .info-list .ti, .stats .ti, .c-row .ti, .whyrow .ti, .format .ti { color: var(--icon); }
+.circ { border-color: rgba(110, 58, 48, .32); color: var(--icon); }
+.ph-hero { position: relative; overflow: hidden; background: var(--cream); }
+.ph-hero > .txt, .ph-hero .txt { position: relative; z-index: 2; }
+.ph-hero > .txt { max-width: 860px; }
+.ph-hero h1 { margin-bottom: 14px; }
+.ph-hero .lead { max-width: 560px; }
+.deco { position: absolute; top: 0; right: 0; z-index: 0; pointer-events: none; }
+.deco img { width: 100%; height: 100%; object-fit: cover; }
+/* ветка и тени листьев растворяются в фоне к краям */
+.deco.branch { width: 470px; height: 450px; }
+.deco.branch img, .deco.leaf img { -webkit-mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); }
+.deco.leaf { width: 440px; height: 330px; opacity: .9; }
+/* услуги: фото штукатурки справа, карточки наложены на его низ */
+.svc-page .deco { width: 56%; height: 340px; border-top-right-radius: var(--r); overflow: hidden; }
+.svc-page .deco img { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%), linear-gradient(0deg, transparent 0%, #000 30%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 38%), linear-gradient(0deg, transparent 0%, #000 30%); mask-composite: intersect; }
+.svc-page > .txt { min-height: 250px; }
+.svc-page .svc-grid { position: relative; z-index: 2; }
+.ph-hero .cat-grid, .ph-hero .proj-row, .ph-hero .arts, .ph-hero #results { position: relative; z-index: 2; }
+.ph-hero .chips { position: relative; z-index: 2; margin-top: 26px; }
+.cat-page > .txt { min-height: 220px; }
+/* дизайнерам: кнопка «врезана» в нижний левый угол фото */
+.des { display: grid; grid-template-columns: 1fr 1.1fr; gap: 44px; align-items: center; position: relative; z-index: 2; }
+.des .info-list li { border-bottom: 0; padding: 9px 0; }
+.des .info-list .ti { font-size: 26px; }
+.des-ph { position: relative; }
+.des-ph img { width: 100%; height: 440px; object-fit: cover; border-radius: var(--r); }
+.notch { position: absolute; left: 0; bottom: 0; background: var(--cream); padding: 20px 24px 0 0; border-top-right-radius: 30px; }
+.notch::before, .notch::after { content: ""; position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 100% 0, transparent 29.5px, var(--cream) 30px); }
+.notch::before { left: 0; top: -30px; }
+.notch::after { right: -30px; bottom: 0; }
+/* о салоне: фото в форме арки */
+.about-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: stretch; position: relative; z-index: 2; }
+.about-hero .txt { align-self: center; }
+.arch-ph { position: relative; overflow: hidden; min-height: 480px; border-radius: 320px 320px var(--r) var(--r) / 260px 260px var(--r) var(--r); box-shadow: var(--shadow); }
+.arch-ph img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.arch-badge { position: absolute; left: 20px; bottom: 20px; background: rgba(255, 255, 255, .9); backdrop-filter: blur(6px); border-radius: 16px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.arch-badge .logo-mark { width: 22px; height: 26px; color: var(--ink); }
+.arch-badge b { display: block; font: 700 15px/1.1 var(--sans); color: var(--ink); }
+.about-hero .stats b { font-size: clamp(24px, 2.2vw, 32px); }
+.about-hero .stats small { display: block; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+/* контакты: коричневые иконки, цветные мессенджеры, карта в бежевых тонах и белой рамке */
+.c-row .ti { font-size: 26px; }
+.msgs.brand { gap: 6px 18px; }
+.msgs.brand a, .msgs.brand span { border: 0; background: none; padding: 0; height: auto; font: 600 14px/1 var(--sans); gap: 8px; }
+.msgs.brand .ti { font-size: 22px; }
+.msgs.brand .wa .ti { color: #25D366; } .msgs.brand .tg .ti { color: #2AABEE; } .msgs.brand .mx .ti { color: #4C6EF5; } .msgs.brand .vk .ti { color: #0077FF; }
+.map { border: 9px solid #fff; box-shadow: var(--shadow); }
+.map img { filter: grayscale(1) sepia(.32) saturate(.85) brightness(1.08) contrast(.88); }
+.map-tag { font-size: 14px; padding: 12px 16px; }
+.map-tag .ti { font-size: 24px; }
+.contacts .c-ph { box-shadow: var(--shadow); }
+
 /* ——— адаптив ——— */
 @media (max-width: 1200px) {
   .nav { gap: 18px; font-size: 14px; }
@@ -593,4 +651,20 @@ a.chip:hover, button.chip:hover { border-color: var(--wine); }
   .pick { grid-template-columns: 56px 1fr auto; }
   .pick .qty { grid-column: 2; justify-self: start; }
   .pick .rm { grid-row: 1; grid-column: 3; }
+}
+
+@media (max-width: 980px) {
+  .svc-page .deco, .deco.branch, .deco.leaf { position: relative; width: auto; height: 200px; margin: -28px -28px 10px; border-radius: 0; }
+  .svc-page .deco img { -webkit-mask-image: linear-gradient(0deg, transparent 0%, #000 45%); mask-image: linear-gradient(0deg, transparent 0%, #000 45%); }
+  .svc-page > .txt, .cat-page > .txt { min-height: 0; margin-bottom: 20px; }
+  .deco.branch, .deco.leaf { position: absolute; width: 220px; height: 210px; margin: 0; opacity: .7; }
+  .des, .about-hero { grid-template-columns: 1fr; }
+  .des-ph img { height: 320px; }
+  .arch-ph { min-height: 380px; }
+}
+@media (max-width: 640px) {
+  .svc-page .deco { margin: -28px -20px 10px; }
+  .deco.branch, .deco.leaf { width: 150px; height: 150px; opacity: .55; }
+  .notch { padding: 14px 16px 0 0; }
+  .notch .btn { height: 46px; padding: 0 18px; font-size: 14px; }
 }

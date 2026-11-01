@@ -11,7 +11,8 @@
   function tx(s) { return esc(window.typo ? typo(s) : s); }
   function money(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); }
   function param(k) { return new URLSearchParams(location.search).get(k); }
-  function src(name, small) { return "img/vk/" + (small ? "s/" : "") + name + ".jpg"; }
+  // фото из группы ВК — img/vk/<имя>, оформление сайта — img/ui/<имя> (имя с приставкой «ui/»)
+  function src(name, small) { return name.indexOf("ui/") === 0 ? "img/" + name + ".jpg" : "img/vk/" + (small ? "s/" : "") + name + ".jpg"; }
   function pic(name, alt, small, eager) {
     return name ? '<img src="' + src(name, small) + '" alt="' + esc(alt || "") + '"' + (eager ? "" : ' loading="lazy"') + ' decoding="async">' : "";
   }
@@ -108,7 +109,7 @@
       "</nav>" +
       '<div class="top-icons">' +
         '<a class="ico srch" href="catalog.html#search" aria-label="Поиск по каталогу"><i class="ti ti-search"></i></a>' +
-        '<button class="ico pick-ico" data-drawer aria-label="Подборка"><i class="ti ti-shopping-bag"></i><span class="count"></span></button>' +
+        '<button class="ico pick-ico" data-drawer aria-label="Подборка"><i class="ti ti-bookmark"></i><span class="count"></span></button>' +
         '<a class="ico wa" href="https://wa.me/' + SALON.wa + '" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>' +
         '<button class="ico burger" aria-label="Меню"><i class="ti ti-menu-2"></i></button>' +
       "</div></div></div>");
@@ -197,12 +198,12 @@
   /* ——— карточки ——— */
   function dirs(list) {
     return list.map(function (c) {
-      return '<a class="dir" href="category.html?c=' + c.id + '"><div class="dir-ph">' + pic(c.tile, c.name, true) + '</div><div class="dir-cap"><span>' + c.name + "</span>" + CIRC + "</div></a>";
+      return '<a class="dir" href="category.html?c=' + c.id + '"><div class="dir-ph">' + pic(c.tex || c.tile, c.name, true) + '</div><div class="dir-cap"><span>' + c.name + "</span>" + CIRC + "</div></a>";
     }).join("");
   }
   function catCards(list) {
     return list.map(function (c) {
-      return '<a class="cat-card' + (c.id === "mebel" ? " wide" : "") + '" href="category.html?c=' + c.id + '"><div class="ph">' + pic(c.tile, c.name, true) + '</div><div class="cap"><div><b>' + c.name + "</b><span>" + tx(c.short || c.lead) + "</span></div>" + CIRC + "</div></a>";
+      return '<a class="cat-card' + (c.id === "mebel" ? " wide" : "") + '" href="category.html?c=' + c.id + '"><div class="ph">' + pic(c.tex || c.tile, c.name, true) + '</div><div class="cap"><div><b>' + c.name + "</b><span>" + tx(c.short || c.lead) + "</span></div>" + CIRC + "</div></a>";
     }).join("");
   }
   function good(p, full) {
