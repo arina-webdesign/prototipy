@@ -507,8 +507,11 @@ a.chip:hover, button.chip:hover { border-color: var(--wine); }
 .deco { position: absolute; top: 0; right: 0; z-index: 0; pointer-events: none; }
 .deco img { width: 100%; height: 100%; object-fit: cover; }
 /* ветка и тени листьев растворяются в фоне к краям */
-.deco.branch { width: 470px; height: 450px; }
-.deco.branch img, .deco.leaf img { -webkit-mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); }
+.deco.branch { width: 390px; height: 390px; top: -34px; right: -24px; }
+.deco.branch img { position: absolute; inset: 0; object-fit: contain; filter: drop-shadow(0 10px 12px rgba(60, 45, 30, .2)); }
+/* мягкая тень ветки на стене, как на картинке концепции */
+.deco.branch img.sh { filter: blur(10px) brightness(0); opacity: .12; transform: translate(-60px, 74px) rotate(8deg) scale(1.06); }
+.deco.leaf img { -webkit-mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); mask-image: radial-gradient(ellipse 100% 100% at 100% 0%, #000 42%, transparent 78%); }
 .deco.leaf { width: 440px; height: 330px; opacity: .9; }
 /* услуги: фото штукатурки справа, карточки наложены на его низ */
 .svc-page .deco { width: 56%; height: 340px; border-top-right-radius: var(--r); overflow: hidden; }
